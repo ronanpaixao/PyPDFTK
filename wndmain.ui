@@ -60,9 +60,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileAdd">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -86,9 +83,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileRem">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -187,9 +181,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileLoad">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
@@ -203,9 +194,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileLoadAll">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
