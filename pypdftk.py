@@ -152,6 +152,24 @@ class WndMain(QtGui.QMainWindow):
     def on_btnPageSortDesc_clicked(self):
         self.listPages.sortItems(QtCore.Qt.DescendingOrder)
 
+    @QtCore.pyqtSlot()
+    def on_btnWriteSingle_clicked(self):
+        supported_files = self.tr("PDF file (*.pdf)")
+        filename = QtGui.QFileDialog.getSaveFileName(self,
+                                                     self.tr('Save file'),
+                                                     "",
+                                                     supported_files)
+        if filename:
+            output_pdf = pdf.PdfFileWriter()
+            rows = range(self.listPages.count())
+            for item in [self.listPages.item(row) for row in rows]:
+                page_uuid = item.data(QtCore.Qt.UserRole)
+                output_pdf.addPage(self.pages[page_uuid].obj)
+            with open(filename, 'wb') as f:
+                output_pdf.write(f)
+
+
+
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()

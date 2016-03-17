@@ -474,9 +474,6 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QPushButton" name="btnWriteSingle">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="text">
           <string>Write to single file</string>
          </property>
