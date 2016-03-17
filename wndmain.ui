@@ -105,6 +105,22 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="btnFilesClear">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>✖✖✖</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
             <string>Sort:</string>

@@ -111,6 +111,10 @@ class WndMain(QtGui.QMainWindow):
         self.listFiles.sortItems(QtCore.Qt.DescendingOrder)
 
     @QtCore.pyqtSlot()
+    def on_btnFilesClear_clicked(self):
+        self.listFiles.clear()
+
+    @QtCore.pyqtSlot()
     def on_btnPageRem_clicked(self):
         for item in self.listPages.selectedItems():
             page_uuid = item.data(QtCore.Qt.UserRole)
