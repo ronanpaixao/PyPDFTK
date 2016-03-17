@@ -119,9 +119,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileSortAsc">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>△</string>
            </property>
@@ -129,9 +126,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileSortDesc">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>▽</string>
            </property>

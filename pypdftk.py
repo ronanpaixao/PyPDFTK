@@ -101,6 +101,15 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listFiles.item(row) for row in rows]:
             filename = item.data(QtCore.Qt.ToolTipRole)
             self.load_pages(filename)
+
+    @QtCore.pyqtSlot()
+    def on_btnFileSortAsc_clicked(self):
+        self.listFiles.sortItems(QtCore.Qt.AscendingOrder)
+
+    @QtCore.pyqtSlot()
+    def on_btnFileSortDesc_clicked(self):
+        self.listFiles.sortItems(QtCore.Qt.DescendingOrder)
+
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()
