@@ -27,7 +27,8 @@ class WndMain(QtGui.QMainWindow):
     def open_file(self, filename):
         filename = filename.replace("/", osp.sep)
         if not osp.exists(filename):
-            print("File doesn't exist!?")
+            errormsg = self.tr("File <{}> doesn't exist.").format(filename)
+            QtGui.QMessageBox.warning(self, self.tr("Error"), errormsg)
             return
         item = QtGui.QListWidgetItem(osp.basename(filename))
         item.setData(QtCore.Qt.ToolTipRole, filename)
