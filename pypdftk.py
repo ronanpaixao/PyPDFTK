@@ -56,6 +56,10 @@ class WndMain(QtGui.QMainWindow):
         for filename in filenames:
             self.open_file(filename)
 
+    @QtCore.pyqtSlot()
+    def on_btnFileRem_clicked(self):
+        for item in self.listFiles.selectedItems():
+            self.listFiles.takeItem(self.listFiles.row(item))
 
 #%%
 if __name__ == '__main__':
