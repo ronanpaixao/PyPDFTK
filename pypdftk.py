@@ -110,6 +110,13 @@ class WndMain(QtGui.QMainWindow):
     def on_btnFileSortDesc_clicked(self):
         self.listFiles.sortItems(QtCore.Qt.DescendingOrder)
 
+    @QtCore.pyqtSlot()
+    def on_btnPageRem_clicked(self):
+        for item in self.listPages.selectedItems():
+            page_uuid = item.data(QtCore.Qt.UserRole)
+            del self.pages[page_uuid]
+            self.listPages.takeItem(self.listPages.row(item))
+
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()

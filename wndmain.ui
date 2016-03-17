@@ -250,9 +250,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageRem">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
