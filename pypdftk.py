@@ -12,6 +12,24 @@ import os.path as osp
 from PyQt4 import QtCore, QtGui, uic, Qt
 import PyPDF2 as pdf
 import uuid
+from cStringIO import StringIO
+
+
+class Page(object):
+    def __init__(self, reader, page_number):
+        self.tmp = StringIO()
+        output = pdf.PdfFileWriter()
+        output.addPage(reader.getPage(page_number))
+        output.write(self.tmp)
+        self.tmp.seek(0)
+        reader = pdf.PdfFileReader(self.tmp, strict=False)
+        self.uuid = uuid.uuid4()
+        self.obj = reader.getPage(0)
+        self._number = str(page_number + 1)
+
+    @property
+    def number(self):
+        return self._number
 
 
 class WndMain(QtGui.QMainWindow):
@@ -50,12 +68,12 @@ class WndMain(QtGui.QMainWindow):
                 reader = pdf.PdfFileReader(f, strict=False)
                 total_pages = reader.getNumPages()
                 for i in range(total_pages):
-                    page_uuid = uuid.uuid4()
-                    self.pages[page_uuid] = reader.getPage(i)
+                    page = Page(reader, i)
+                    self.pages[page.uuid] = page
                     item = QtGui.QListWidgetItem("{0}<{1}>".format(
                         osp.basename(filename),
-                        i+1))
-                    item.setData(QtCore.Qt.UserRole, page_uuid)
+                        page.number))
+                    item.setData(QtCore.Qt.UserRole, page.uuid)
                     self.listPages.addItem(item)
 
 
