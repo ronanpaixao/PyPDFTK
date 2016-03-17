@@ -16,7 +16,7 @@ from cStringIO import StringIO
 
 
 class Page(object):
-    def __init__(self, reader, page_number):
+    def __init__(self, reader, page_number, filename):
         self.tmp = StringIO()
         output = pdf.PdfFileWriter()
         output.addPage(reader.getPage(page_number))
@@ -25,11 +25,31 @@ class Page(object):
         reader = pdf.PdfFileReader(self.tmp, strict=False)
         self.uuid = uuid.uuid4()
         self.obj = reader.getPage(0)
-        self._number = str(page_number + 1)
+        self._numbers = [str(page_number + 1)]
+        self.transforms = ""
+        self._basename = osp.basename(filename)
+
+    def rotateLeft(self):
+        self.obj.rotateCounterClockwise(90)
+        self.transforms += '↺'
+        if self.transforms.endswith('↻↺'):
+            self.transforms = self.transforms[:-2]
+        if self.transforms.endswith('↺↺↺'):
+            self.transforms = self.transforms[:-3]+'↻'
+
+    def rotateRight(self):
+        self.obj.rotateClockwise(90)
+        self.transforms += '↻'
+        if self.transforms.endswith('↺↻'):
+            self.transforms = self.transforms[:-2]
+        if self.transforms.endswith('↻↻↻'):
+            self.transforms = self.transforms[:-3]+'↺'
 
     @property
-    def number(self):
-        return self._number
+    def name(self):
+        return u"{0}<{1}>[{2}]".format(self._basename,
+                                       ','.join(self._numbers),
+                                       self.transforms)
 
 
 class WndMain(QtGui.QMainWindow):
@@ -68,14 +88,11 @@ class WndMain(QtGui.QMainWindow):
                 reader = pdf.PdfFileReader(f, strict=False)
                 total_pages = reader.getNumPages()
                 for i in range(total_pages):
-                    page = Page(reader, i)
+                    page = Page(reader, i, filename)
                     self.pages[page.uuid] = page
-                    item = QtGui.QListWidgetItem("{0}<{1}>".format(
-                        osp.basename(filename),
-                        page.number))
+                    item = QtGui.QListWidgetItem(page.name)
                     item.setData(QtCore.Qt.UserRole, page.uuid)
                     self.listPages.addItem(item)
-
 
     def on_listFiles_dropped(self, links):
         print("filesDropped:", links)
@@ -151,6 +168,22 @@ class WndMain(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def on_btnPageSortDesc_clicked(self):
         self.listPages.sortItems(QtCore.Qt.DescendingOrder)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageRotLeft_clicked(self):
+        for item in self.listPages.selectedItems():
+            page_uuid = item.data(QtCore.Qt.UserRole)
+            page = self.pages[page_uuid]
+            page.rotateLeft()
+            item.setText(page.name)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageRotRight_clicked(self):
+        for item in self.listPages.selectedItems():
+            page_uuid = item.data(QtCore.Qt.UserRole)
+            page = self.pages[page_uuid]
+            page.rotateRight()
+            item.setText(page.name)
 
     @QtCore.pyqtSlot()
     def on_btnWriteSingle_clicked(self):

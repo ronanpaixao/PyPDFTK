@@ -377,9 +377,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageRotLeft">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="styleSheet">
             <string notr="true">font: 11pt;</string>
            </property>
@@ -390,9 +387,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageRotRight">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="styleSheet">
             <string notr="true">font: 11pt;</string>
            </property>
