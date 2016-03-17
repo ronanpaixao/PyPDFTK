@@ -56,3 +56,5 @@ target/
 # Bower packages (should be installed by running bower)
 comps/
 
+build-*
+unicode_test*
