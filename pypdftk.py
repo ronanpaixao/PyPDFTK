@@ -8,6 +8,7 @@ Created on Thu Mar 17 12:11:22 2016
 from __future__ import division, unicode_literals, print_function
 
 import sys
+import os.path as osp
 from PyQt4 import QtCore, QtGui, uic, Qt
 
 class WndMain(QtGui.QMainWindow):
@@ -23,6 +24,17 @@ class WndMain(QtGui.QMainWindow):
 #        QtCore.QMetaObject.connectSlotsByName(self)
         self.show()
 
+    def on_listFiles_dropped(self, links):
+        print("filesDropped:", links)
+
+        for link in links:
+            link = link.replace("/", osp.sep)
+            if not osp.exists(link):
+                print("File doesn't exist!?")
+                continue
+            item = QtGui.QListWidgetItem(osp.basename(link))
+            item.setData(QtCore.Qt.ToolTipRole, link)
+            self.listFiles.addItem(item)
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()

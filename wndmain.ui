@@ -31,7 +31,17 @@
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="listFiles"/>
+          <widget class="DragDropList" name="listFiles">
+           <property name="dragEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::InternalMove</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -519,6 +529,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DragDropList</class>
+   <extends>QListWidget</extends>
+   <header>dragdroplist.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
