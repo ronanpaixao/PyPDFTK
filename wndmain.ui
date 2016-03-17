@@ -306,9 +306,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageSortAsc">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>△</string>
            </property>
@@ -316,9 +313,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageSortDesc">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>▽</string>
            </property>

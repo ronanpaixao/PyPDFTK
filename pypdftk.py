@@ -126,6 +126,14 @@ class WndMain(QtGui.QMainWindow):
         self.listPages.clear()
         self.pages = {}
 
+    @QtCore.pyqtSlot()
+    def on_btnPageSortAsc_clicked(self):
+        self.listPages.sortItems(QtCore.Qt.AscendingOrder)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageSortDesc_clicked(self):
+        self.listPages.sortItems(QtCore.Qt.DescendingOrder)
+
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()
