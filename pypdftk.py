@@ -24,17 +24,39 @@ class WndMain(QtGui.QMainWindow):
 #        QtCore.QMetaObject.connectSlotsByName(self)
         self.show()
 
+    def open_file(self, filename):
+        filename = filename.replace("/", osp.sep)
+        if not osp.exists(filename):
+            print("File doesn't exist!?")
+            return
+        item = QtGui.QListWidgetItem(osp.basename(filename))
+        item.setData(QtCore.Qt.ToolTipRole, filename)
+        self.listFiles.addItem(item)
+        if filename.endswith('.pdf'):
+#            reader = pdf.PdfFileReader(dumpfile)
+            print(filename, osp.exists(filename))
+
     def on_listFiles_dropped(self, links):
         print("filesDropped:", links)
 
         for link in links:
-            link = link.replace("/", osp.sep)
-            if not osp.exists(link):
-                print("File doesn't exist!?")
-                continue
-            item = QtGui.QListWidgetItem(osp.basename(link))
-            item.setData(QtCore.Qt.ToolTipRole, link)
-            self.listFiles.addItem(item)
+            self.open_file(link)
+
+    @QtCore.pyqtSlot()
+    def on_btnFileAdd_clicked(self):
+        print("on_btnFileAdd_clicked")
+        supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg)"
+                                  ";;PDF file (*.pdf)"
+                                  ";;JPEG file (*.jpg *.jpeg)"
+                                  ";;All files (*.*)")
+        filenames = QtGui.QFileDialog.getOpenFileNames(self,
+                                                       self.tr('Open file'),
+                                                       "",
+                                                       supported_files)
+        for filename in filenames:
+            self.open_file(filename)
+
+
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()
