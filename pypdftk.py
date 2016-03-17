@@ -186,6 +186,10 @@ class WndMain(QtGui.QMainWindow):
             item.setText(page.name)
 
     @QtCore.pyqtSlot()
+    def on_btnPageSelectAll_clicked(self):
+        self.listPages.selectAll()
+
+    @QtCore.pyqtSlot()
     def on_btnWriteSingle_clicked(self):
         supported_files = self.tr("PDF file (*.pdf)")
         filename = QtGui.QFileDialog.getSaveFileName(self,

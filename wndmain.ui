@@ -447,9 +447,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageSelectAll">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>☑Select All</string>
            </property>
