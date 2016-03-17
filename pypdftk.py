@@ -121,6 +121,11 @@ class WndMain(QtGui.QMainWindow):
             del self.pages[page_uuid]
             self.listPages.takeItem(self.listPages.row(item))
 
+    @QtCore.pyqtSlot()
+    def on_btnPageClear_clicked(self):
+        self.listPages.clear()
+        self.pages = {}
+
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()

@@ -283,9 +283,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnPageClear">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="minimumSize">
             <size>
              <width>50</width>
