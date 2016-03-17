@@ -95,6 +95,12 @@ class WndMain(QtGui.QMainWindow):
             sys.stdout.flush()
             self.load_pages(filename)
 
+    @QtCore.pyqtSlot()
+    def on_btnFileLoadAll_clicked(self):
+        rows = range(self.listFiles.count())
+        for item in [self.listFiles.item(row) for row in rows]:
+            filename = item.data(QtCore.Qt.ToolTipRole)
+            self.load_pages(filename)
 #%%
 if __name__ == '__main__':
     existing = QtGui.qApp.instance()
