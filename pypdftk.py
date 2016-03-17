@@ -10,6 +10,9 @@ from __future__ import division, unicode_literals, print_function
 import sys
 import os.path as osp
 from PyQt4 import QtCore, QtGui, uic, Qt
+import PyPDF2 as pdf
+import uuid
+
 
 class WndMain(QtGui.QMainWindow):
     ######################
@@ -18,6 +21,7 @@ class WndMain(QtGui.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(WndMain, self).__init__(*args, **kwargs)
         self.initUI()
+        self.pages = {}
 
     def initUI(self):
         uic.loadUi('wndmain.ui', self)
@@ -33,9 +37,27 @@ class WndMain(QtGui.QMainWindow):
         item = QtGui.QListWidgetItem(osp.basename(filename))
         item.setData(QtCore.Qt.ToolTipRole, filename)
         self.listFiles.addItem(item)
-        if filename.endswith('.pdf'):
-#            reader = pdf.PdfFileReader(dumpfile)
+
+    def load_pages(self, filename):
+        print("load_pages", filename)
+        if not osp.exists(filename):
+            errormsg = self.tr("File <{}> doesn't exist.").format(filename)
+            QtGui.QMessageBox.warning(self, self.tr("Error"), errormsg)
+            return
+        if filename.lower().endswith('.pdf'):
             print(filename, osp.exists(filename))
+            with open(filename, 'rb') as f:
+                reader = pdf.PdfFileReader(f, strict=False)
+                total_pages = reader.getNumPages()
+                for i in range(total_pages):
+                    page_uuid = uuid.uuid4()
+                    self.pages[page_uuid] = reader.getPage(i)
+                    item = QtGui.QListWidgetItem("{0}<{1}>".format(
+                        osp.basename(filename),
+                        i+1))
+                    item.setData(QtCore.Qt.UserRole, page_uuid)
+                    self.listPages.addItem(item)
+
 
     def on_listFiles_dropped(self, links):
         print("filesDropped:", links)
@@ -61,6 +83,17 @@ class WndMain(QtGui.QMainWindow):
     def on_btnFileRem_clicked(self):
         for item in self.listFiles.selectedItems():
             self.listFiles.takeItem(self.listFiles.row(item))
+
+    @QtCore.pyqtSlot()
+    def on_btnFileLoad_clicked(self):
+        # sort by row, otherwise it's selection order
+        rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
+        rows.sort()
+        for item in [self.listFiles.item(row) for row in rows]:
+            filename = item.data(QtCore.Qt.ToolTipRole)
+            print(filename)
+            sys.stdout.flush()
+            self.load_pages(filename)
 
 #%%
 if __name__ == '__main__':
