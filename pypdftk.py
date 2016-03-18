@@ -341,6 +341,35 @@ class WndMain(QtGui.QMainWindow):
                     ).format(e.errno, e.strerror)
                 QtGui.QMessageBox.critical(self, self.tr("Error"), errmsg)
 
+    @QtCore.pyqtSlot()
+    def on_btnWriteMulti_clicked(self):
+        if self.listPages.count() == 0:
+            QtGui.QMessageBox.critical(self, self.tr("Error"),
+                                       self.tr("No pages to save!"))
+            return
+        supported_files = self.tr("PDF file (*.pdf)")
+        filename = QtGui.QFileDialog.getSaveFileName(self,
+                                                     self.tr('Save file'),
+                                                     "",
+                                                     supported_files)
+        if filename:
+            fileprefix = osp.splitext(filename)[0]
+            rows = range(self.listPages.count())
+            # pre-check filenames to see if we're overwriting something
+            for i in rows:
+                filename_i = "{}{:04}.pdf".format(fileprefix, i)
+                if osp.exists(filename_i):
+                    errmsg = self.tr("File {} already exists!\nWe don't want "
+                        "to overwrite it. Aborting.").format(filename_i)
+                    QtGui.QMessageBox.critical(self, self.tr("Error"),
+                                               errmsg)
+            for i, item in enumerate([self.listPages.item(row) for row in rows]):
+                output_pdf = pdf.PdfFileWriter()
+                page_uuid = item.data(QtCore.Qt.UserRole)
+                output_pdf.addPage(self.pages[page_uuid].obj)
+                with open("{}{:04}.pdf".format(fileprefix, i), 'wb') as f:
+                    output_pdf.write(f)
+
 
 
 #%%

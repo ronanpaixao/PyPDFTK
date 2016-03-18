@@ -448,9 +448,6 @@
        </item>
        <item>
         <widget class="QPushButton" name="btnWriteMulti">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="text">
           <string>Write each page to a file</string>
          </property>
