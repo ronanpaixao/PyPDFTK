@@ -9,11 +9,20 @@ from __future__ import division, unicode_literals, print_function
 
 import sys
 import os.path as osp
-from PyQt4 import QtCore, QtGui, uic, Qt
-import PyPDF2 as pdf
 import uuid
 from cStringIO import StringIO
 import subprocess
+
+# Setup PyQt's v2 APIs
+import sip
+API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl",
+             "QVariant"]
+API_VERSION = 2
+for name in API_NAMES:
+    sip.setapi(name, API_VERSION)
+from PyQt4 import QtCore, QtGui, uic, Qt
+
+import PyPDF2 as pdf
 
 
 if sys.platform == 'darwin':
