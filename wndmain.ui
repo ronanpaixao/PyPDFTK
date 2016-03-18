@@ -150,9 +150,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileTop">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>▲▲</string>
            </property>
@@ -160,9 +157,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileUp">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>▲</string>
            </property>
@@ -170,9 +164,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileDown">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>▼</string>
            </property>
@@ -180,9 +171,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="btnFileBottom">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>▼▼</string>
            </property>

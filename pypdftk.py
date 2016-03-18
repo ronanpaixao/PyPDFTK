@@ -120,6 +120,69 @@ class WndMain(QtGui.QMainWindow):
             self.listFiles.takeItem(self.listFiles.row(item))
 
     @QtCore.pyqtSlot()
+    def on_btnFileTop_clicked(self):
+        rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
+        rows.sort(reverse=True)
+        for item in [self.listFiles.item(row) for row in rows]:
+            row = self.listFiles.row(item)
+            self.listFiles.insertItem(0, self.listFiles.takeItem(row))
+        for row in range(len(rows)):
+            self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
+    def on_btnFileUp_clicked(self):
+        rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
+        rows.sort()
+        # Ignore rows already on top
+        first_rows = []
+        first_row = 0
+        print(rows)
+        for row in rows[:]:
+            if row == first_row:
+                first_rows.append(row)
+                rows.remove(row)
+                first_row += 1
+        for item in [self.listFiles.item(row) for row in rows]:
+            row = self.listFiles.row(item)
+            self.listFiles.insertItem(row-1, self.listFiles.takeItem(row))
+        print(first_rows,rows)
+        sys.stdout.flush()
+        for row in first_rows + map(lambda r: r-1, rows):
+            self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
+    def on_btnFileDown_clicked(self):
+        rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
+        rows.sort(reverse=True)
+        # Ignore rows already on top
+        last_rows = []
+        last_row = self.listFiles.count() - 1
+        print(rows)
+        for row in rows[:]:
+            if row == last_row:
+                last_rows.append(row)
+                rows.remove(row)
+                last_row -= 1
+        for item in [self.listFiles.item(row) for row in rows]:
+            row = self.listFiles.row(item)
+            self.listFiles.insertItem(row+1, self.listFiles.takeItem(row))
+        print(last_rows,rows)
+        sys.stdout.flush()
+        for row in last_rows + map(lambda r: r+1, rows):
+            self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
+    def on_btnFileBottom_clicked(self):
+        rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
+        rows.sort()
+        last = self.listFiles.count() - 1
+        for item in [self.listFiles.item(row) for row in rows]:
+            row = self.listFiles.row(item)
+            self.listFiles.insertItem(last, self.listFiles.takeItem(row))
+        for row in range(len(rows)):
+            self.listFiles.setCurrentRow(last-row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
     def on_btnFileLoad_clicked(self):
         # sort by row, otherwise it's selection order
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
