@@ -317,6 +317,10 @@ class WndMain(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def on_btnWriteSingle_clicked(self):
+        if self.listPages.count() == 0:
+            QtGui.QMessageBox.critical(self, self.tr("Error"),
+                                       self.tr("No pages to save!"))
+            return
         supported_files = self.tr("PDF file (*.pdf)")
         filename = QtGui.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
