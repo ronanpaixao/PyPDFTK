@@ -13,6 +13,18 @@ from PyQt4 import QtCore, QtGui, uic, Qt
 import PyPDF2 as pdf
 import uuid
 from cStringIO import StringIO
+import subprocess
+
+
+if sys.platform == 'darwin':
+    def show_file(path):
+        subprocess.Popen(['open', '--', path])
+elif sys.platform == 'linux2':
+    def show_file(path):
+        subprocess.Popen(['xdg-open', '--', path])
+elif sys.platform == 'win32':
+    def show_file(path):
+        subprocess.Popen(['explorer', '/select,', path])
 
 
 class Page(object):
@@ -211,6 +223,11 @@ class WndMain(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def on_btnFilesClear_clicked(self):
         self.listFiles.clear()
+
+    @QtCore.pyqtSlot()
+    def on_btnFileOpenLoc_clicked(self):
+        filename = self.listFiles.currentItem().data(QtCore.Qt.ToolTipRole)
+        show_file(filename)
 
     @QtCore.pyqtSlot()
     def on_btnPageRem_clicked(self):

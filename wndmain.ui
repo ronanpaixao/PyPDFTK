@@ -222,6 +222,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="btnFileOpenLoc">
+           <property name="text">
+            <string>Open Location</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
