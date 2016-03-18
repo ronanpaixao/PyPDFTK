@@ -8,6 +8,7 @@ Created on Thu Mar 17 12:11:22 2016
 from __future__ import division, unicode_literals, print_function
 
 import sys
+import os
 import os.path as osp
 import uuid
 from cStringIO import StringIO
@@ -29,12 +30,17 @@ import PyPDF2 as pdf
 if sys.platform == 'darwin':
     def show_file(path):
         subprocess.Popen(['open', '--', path])
+    def open_default_program(path):
+        subprocess.Popen(['start', path])
 elif sys.platform == 'linux2':
     def show_file(path):
         subprocess.Popen(['xdg-open', '--', path])
+    def open_default_program(path):
+        subprocess.Popen(['xdg-open', path])
 elif sys.platform == 'win32':
     def show_file(path):
         subprocess.Popen(['explorer', '/select,', path])
+    open_default_program = os.startfile
 
 
 class Page(object):
