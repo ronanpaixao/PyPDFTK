@@ -111,6 +111,10 @@ class WndMain(QtGui.QMainWindow):
 
     def initUI(self):
         uic.loadUi('wndmain.ui', self)
+        self.supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg)"
+                                       ";;PDF file (*.pdf)"
+                                       ";;JPEG file (*.jpg *.jpeg)"
+                                       ";;All files (*.*)")
 #        QtCore.QMetaObject.connectSlotsByName(self)
         self.show()
 
@@ -151,14 +155,10 @@ class WndMain(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def on_btnFileAdd_clicked(self):
         print("on_btnFileAdd_clicked")
-        supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg)"
-                                  ";;PDF file (*.pdf)"
-                                  ";;JPEG file (*.jpg *.jpeg)"
-                                  ";;All files (*.*)")
         filenames = QtGui.QFileDialog.getOpenFileNames(self,
                                                        self.tr('Open file'),
                                                        "",
-                                                       supported_files)
+                                                       self.supported_files)
         for filename in filenames:
             self.open_file(filename)
 
