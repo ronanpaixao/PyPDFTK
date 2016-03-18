@@ -233,6 +233,69 @@ class WndMain(QtGui.QMainWindow):
         self.listPages.sortItems(QtCore.Qt.DescendingOrder)
 
     @QtCore.pyqtSlot()
+    def on_btnPageTop_clicked(self):
+        rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
+        rows.sort(reverse=True)
+        for item in [self.listPages.item(row) for row in rows]:
+            row = self.listPages.row(item)
+            self.listPages.insertItem(0, self.listPages.takeItem(row))
+        for row in range(len(rows)):
+            self.listPages.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageUp_clicked(self):
+        rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
+        rows.sort()
+        # Ignore rows already on top
+        first_rows = []
+        first_row = 0
+        print(rows)
+        for row in rows[:]:
+            if row == first_row:
+                first_rows.append(row)
+                rows.remove(row)
+                first_row += 1
+        for item in [self.listPages.item(row) for row in rows]:
+            row = self.listPages.row(item)
+            self.listPages.insertItem(row-1, self.listPages.takeItem(row))
+        print(first_rows,rows)
+        sys.stdout.flush()
+        for row in first_rows + map(lambda r: r-1, rows):
+            self.listPages.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageDown_clicked(self):
+        rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
+        rows.sort(reverse=True)
+        # Ignore rows already on top
+        last_rows = []
+        last_row = self.listPages.count() - 1
+        print(rows)
+        for row in rows[:]:
+            if row == last_row:
+                last_rows.append(row)
+                rows.remove(row)
+                last_row -= 1
+        for item in [self.listPages.item(row) for row in rows]:
+            row = self.listPages.row(item)
+            self.listPages.insertItem(row+1, self.listPages.takeItem(row))
+        print(last_rows,rows)
+        sys.stdout.flush()
+        for row in last_rows + map(lambda r: r+1, rows):
+            self.listPages.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageBottom_clicked(self):
+        rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
+        rows.sort()
+        last = self.listPages.count() - 1
+        for item in [self.listPages.item(row) for row in rows]:
+            row = self.listPages.row(item)
+            self.listPages.insertItem(last, self.listPages.takeItem(row))
+        for row in range(len(rows)):
+            self.listPages.setCurrentRow(last-row, QtGui.QItemSelectionModel.Select)
+
+    @QtCore.pyqtSlot()
     def on_btnPageRotLeft_clicked(self):
         for item in self.listPages.selectedItems():
             page_uuid = item.data(QtCore.Qt.UserRole)
