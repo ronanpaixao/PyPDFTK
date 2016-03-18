@@ -230,23 +230,27 @@ class WndMain(QtGui.QMainWindow):
         for row in range(len(rows)):
             self.listFiles.setCurrentRow(last-row, QtGui.QItemSelectionModel.Select)
 
+    def load_pages_from_rows(self, rows):
+        for item in [self.listFiles.item(row) for row in rows]:
+            filename = item.data(QtCore.Qt.ToolTipRole)
+            pages = self.load_pages(filename)
+            for page in pages:
+                self.pages[page.uuid] = page
+                item = QtGui.QListWidgetItem(page.name)
+                item.setData(QtCore.Qt.UserRole, page.uuid)
+                self.listPages.addItem(item)
+
     @QtCore.pyqtSlot()
     def on_btnFileLoad_clicked(self):
         # sort by row, otherwise it's selection order
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
         rows.sort()
-        for item in [self.listFiles.item(row) for row in rows]:
-            filename = item.data(QtCore.Qt.ToolTipRole)
-            print(filename)
-            sys.stdout.flush()
-            self.load_pages(filename)
+        self.load_pages_from_rows(rows)
 
     @QtCore.pyqtSlot()
     def on_btnFileLoadAll_clicked(self):
         rows = range(self.listFiles.count())
-        for item in [self.listFiles.item(row) for row in rows]:
-            filename = item.data(QtCore.Qt.ToolTipRole)
-            self.load_pages(filename)
+        self.load_pages_from_rows(rows)
 
     @QtCore.pyqtSlot()
     def on_btnFileSortAsc_clicked(self):
