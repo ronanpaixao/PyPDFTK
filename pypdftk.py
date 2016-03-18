@@ -406,6 +406,8 @@ class WndMain(QtGui.QMainWindow):
             try:
                 with open(filename, 'wb') as f:
                     output_pdf.write(f)
+                if self.chkOpenOnSave.isChecked():
+                    open_default_program(filename)
             except IOError as e:
                 errmsg = self.tr("I/O error({0}): {1}\n"
                     "Please check if the file is open in another program."
@@ -435,11 +437,14 @@ class WndMain(QtGui.QMainWindow):
                     QtGui.QMessageBox.critical(self, self.tr("Error"),
                                                errmsg)
             for i, item in enumerate([self.listPages.item(row) for row in rows]):
+                filename_i = "{}{:04}.pdf".format(fileprefix, i)
                 output_pdf = pdf.PdfFileWriter()
                 page_uuid = item.data(QtCore.Qt.UserRole)
                 output_pdf.addPage(self.pages[page_uuid].obj)
-                with open("{}{:04}.pdf".format(fileprefix, i), 'wb') as f:
+                with open(filename_i, 'wb') as f:
                     output_pdf.write(f)
+                if self.chkOpenOnSave.isChecked():
+                    open_default_program(filename)
 
 
 
