@@ -12,6 +12,7 @@ import os.path as osp
 import uuid
 from cStringIO import StringIO
 import subprocess
+from decimal import Decimal
 
 # Setup PyQt's v2 APIs
 import sip
@@ -65,6 +66,32 @@ class Page(object):
             self.transforms = self.transforms[:-2]
         if self.transforms.endswith('↻↻↻'):
             self.transforms = self.transforms[:-3]+'↺'
+
+    def merge(self, page):
+        page2 = page.obj
+        rotation = int(page2.get("/Rotate") or 0) % 360
+        scale = Decimal(1.)
+        # rotation is clockwise. tx, ty in page1 coordinates: x = right; y = up
+        if rotation == 0:
+            tx = 0
+            ty = 0
+        elif rotation == 90:
+            tx = 0
+            ty = self.obj.mediaBox.getHeight()
+        elif rotation == 180:
+            tx = -page2.mediaBox.getWidth()*scale
+            ty = self.obj.mediaBox.getHeight()
+        elif rotation == 270:
+            tx = -page2.mediaBox.getHeight()*scale
+            ty = self.obj.mediaBox.getHeight() - page2.mediaBox.getWidth()*scale
+        self.obj.mergeRotatedScaledTranslatedPage(page2, -rotation, scale, -tx, ty)
+        # Adjust name
+        if self._basename == page._basename:
+            self._numbers.append(','.join(page._numbers))
+        else:
+            self._numbers.append(u"{0}<{1}>".format(page._basename,
+                                 ','.join(page._numbers)))
+        self.transforms += "M"
 
     @property
     def name(self):
@@ -336,6 +363,24 @@ class WndMain(QtGui.QMainWindow):
             page = self.pages[page_uuid]
             page.rotateRight()
             item.setText(page.name)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageMerge_clicked(self):
+        rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
+        rows.sort()
+        if len(rows)<2:
+            return
+        first_item = self.listPages.item(rows[0])
+        variant = first_item.data(QtCore.Qt.UserRole)
+        first_page = self.pages[variant]
+        for item in [self.listPages.item(row) for row in rows[1:]]:
+            row = self.listPages.row(item)
+            merged_page_uuid = item.data(QtCore.Qt.UserRole)
+#            print("merging", first_page.name, 'to', self.pages[merged_page_uuid].name)
+            first_page.merge(self.pages[merged_page_uuid])
+            del self.pages[merged_page_uuid]
+            self.listPages.takeItem(row)
+            first_item.setText(first_page.name)
 
     @QtCore.pyqtSlot()
     def on_btnPageSelectAll_clicked(self):
