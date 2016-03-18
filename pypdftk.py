@@ -332,8 +332,14 @@ class WndMain(QtGui.QMainWindow):
             for item in [self.listPages.item(row) for row in rows]:
                 page_uuid = item.data(QtCore.Qt.UserRole)
                 output_pdf.addPage(self.pages[page_uuid].obj)
-            with open(filename, 'wb') as f:
-                output_pdf.write(f)
+            try:
+                with open(filename, 'wb') as f:
+                    output_pdf.write(f)
+            except IOError as e:
+                errmsg = self.tr("I/O error({0}): {1}\n"
+                    "Please check if the file is open in another program."
+                    ).format(e.errno, e.strerror)
+                QtGui.QMessageBox.critical(self, self.tr("Error"), errmsg)
 
 
 
