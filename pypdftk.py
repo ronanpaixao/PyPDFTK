@@ -326,8 +326,7 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listPages.item(row) for row in rows]:
             row = self.listPages.row(item)
             self.listPages.insertItem(0, self.listPages.takeItem(row))
-        for row in range(len(rows)):
-            self.listPages.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+            item.setSelected(True)
 
     @QtCore.pyqtSlot()
     def on_btnPageUp_clicked(self):
@@ -345,10 +344,7 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listPages.item(row) for row in rows]:
             row = self.listPages.row(item)
             self.listPages.insertItem(row-1, self.listPages.takeItem(row))
-        print(first_rows,rows)
-        sys.stdout.flush()
-        for row in first_rows + map(lambda r: r-1, rows):
-            self.listPages.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+            item.setSelected(True)
 
     @QtCore.pyqtSlot()
     def on_btnPageDown_clicked(self):
@@ -366,10 +362,7 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listPages.item(row) for row in rows]:
             row = self.listPages.row(item)
             self.listPages.insertItem(row+1, self.listPages.takeItem(row))
-        print(last_rows,rows)
-        sys.stdout.flush()
-        for row in last_rows + map(lambda r: r+1, rows):
-            self.listPages.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+            item.setSelected(True)
 
     @QtCore.pyqtSlot()
     def on_btnPageBottom_clicked(self):
@@ -379,8 +372,7 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listPages.item(row) for row in rows]:
             row = self.listPages.row(item)
             self.listPages.insertItem(last, self.listPages.takeItem(row))
-        for row in range(len(rows)):
-            self.listPages.setCurrentRow(last-row, QtGui.QItemSelectionModel.Select)
+            item.setSelected(True)
 
     @QtCore.pyqtSlot()
     def on_btnPageRotLeft_clicked(self):
