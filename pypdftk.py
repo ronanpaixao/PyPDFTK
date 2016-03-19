@@ -14,6 +14,7 @@ import uuid
 from cStringIO import StringIO
 import subprocess
 from decimal import Decimal, InvalidOperation
+import copy
 
 # Setup PyQt's v2 APIs
 import sip
@@ -73,32 +74,50 @@ class Page(object):
         if self.transforms.endswith('↻↻↻'):
             self.transforms = self.transforms[:-3]+'↺'
 
-    def merge(self, page, tx=0.0, ty=0.0, stamp=False):
-        page2 = page.obj
+    @classmethod
+    def merge_pageobjs(cls, page1, page2, tx, ty):
         rotation = int(page2.get("/Rotate") or 0) % 360
         scale = Decimal(1.)
         # rotation is clockwise. tx, ty in page1 coordinates: x = right; y = up
-        print(page.name, tx, ty)
         if rotation == 90:
 #            tx += 0
-            ty += self.obj.mediaBox.getHeight()
+            ty += page1.mediaBox.getHeight()
         elif rotation == 180:
             tx += page2.mediaBox.getWidth()*scale
-            ty += self.obj.mediaBox.getHeight()
+            ty += page1.mediaBox.getHeight()
         elif rotation == 270:
             tx += page2.mediaBox.getHeight()*scale
-            ty += self.obj.mediaBox.getHeight() - page2.mediaBox.getWidth()*scale
-        self.obj.mergeRotatedScaledTranslatedPage(page2, -rotation, scale, tx, ty)
-        # Adjust name
-        if stamp:
-            self.transforms += "⊙"
+            ty += page1.mediaBox.getHeight() - page2.mediaBox.getWidth()*scale
+        page1.mergeRotatedScaledTranslatedPage(page2, -rotation, scale, tx, ty)
+
+    def merge(self, page, tx=0.0, ty=0.0, op="merge"):
+        """op in ['merge', 'stamp', 'background']"""
+        assert(op in ["merge", "stamp", "background"])
+        if op == "background":
+            page0 = pdf.pdf.PageObject.createBlankPage(self.tmp,
+                self.obj.mediaBox.getWidth(), self.obj.mediaBox.getHeight())
+            Page.merge_pageobjs(page0, page.obj, tx, ty)
+            tx = ty = 0
+            page2 = self.obj
+            self.obj = page0
         else:
+            page2 = page.obj
+        self.merge_pageobjs(self.obj, page2, tx, ty)
+        # Adjust name
+        if op == "merge":
             if self._basename == page._basename:
                 self._numbers.append(','.join(page._numbers))
             else:
                 self._numbers.append(u"{0}<{1}>".format(page._basename,
                                      ','.join(page._numbers)))
             self.transforms += "M"
+        elif op == "stamp":
+            self.transforms += "⊙"
+        elif op == "background":
+            self.uuid = page.uuid
+            self._numbers = page._numbers
+            self.transforms = page.transforms + "▣"
+            self._basename = page._basename
 
     @property
     def name(self):
@@ -442,7 +461,40 @@ class WndMain(QtGui.QMainWindow):
         sys.stdout.flush()
         for item in self.listPages.selectedItems():
             page1 = self.pages[item.data(QtCore.Qt.UserRole)]
-            page1.merge(page2, tx*mult, ty*mult, True)
+            page1.merge(page2, tx*mult, ty*mult, "stamp")
+            item.setText(page1.name)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageBackground_clicked(self):
+        if len(self.listPages.selectedItems()) == 0:
+            QtGui.QMessageBox.warning(self, self.tr("Warning"),
+                                       self.tr("You must select at least "
+                                               "one page to apply background."))
+            return
+        try:
+            if self.chkBackgroundStampLoc.isChecked():
+                tx = Decimal(self.lineStampX.text() or 0)
+                ty = Decimal(self.lineStampY.text() or 0)        # 1 PDF unit = 1/72 inches
+                if self.radioStampCm.isChecked():
+                    mult = 72/Decimal(2.54)
+                else:
+                    mult = 72/Decimal(1.0)
+            else:
+                tx = ty = Decimal(0)
+                mult = Decimal(1)
+        except InvalidOperation:
+            QtGui.QMessageBox.critical(self, self.tr("Error"),
+                                       self.tr("x and y must be numbers."))
+            return
+
+        filename = QtGui.QFileDialog.getOpenFileName(self,
+                                                     self.tr('Open file'),
+                                                     "",
+                                                     self.supported_files)
+        page2 = self.load_pages(filename)[0]  # Always first page
+        for item in self.listPages.selectedItems():
+            page1 = self.pages[item.data(QtCore.Qt.UserRole)]
+            page1.merge(page2, tx*mult, ty*mult, "background")
             item.setText(page1.name)
 
     @QtCore.pyqtSlot()

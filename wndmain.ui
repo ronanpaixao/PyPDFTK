@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>932</width>
-    <height>705</height>
+    <width>933</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -502,11 +502,19 @@ selection</string>
          </item>
          <item>
           <widget class="QPushButton" name="btnPageBackground">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>Background</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkBackgroundStampLoc">
+           <property name="text">
+            <string>Use stamp loc as
+ background loc</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -573,7 +581,7 @@ selection</string>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>492</height>
+           <height>527</height>
           </size>
          </property>
         </spacer>
@@ -588,7 +596,7 @@ selection</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>932</width>
+     <width>933</width>
      <height>26</height>
     </rect>
    </property>
