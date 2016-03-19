@@ -135,22 +135,20 @@ class WndMain(QtGui.QMainWindow):
         self.listFiles.addItem(item)
 
     def load_pages(self, filename):
-        print("load_pages", filename)
-        if not osp.exists(filename):
-            errormsg = self.tr("File <{}> doesn't exist.").format(filename)
+        pages = []
+        try:
+            if filename.lower().endswith('.pdf'):
+                with open(filename, 'rb') as f:
+                    reader = pdf.PdfFileReader(f, strict=False)
+                    total_pages = reader.getNumPages()
+                    for i in range(total_pages):
+                        page = Page(reader, i, filename)
+                        pages.append(page)
+        except Exception as e:
+            errormsg = (self.tr("Could not load <{}>:\n{}")
+                        .format(filename, e.strerror))
             QtGui.QMessageBox.warning(self, self.tr("Error"), errormsg)
-            return
-        if filename.lower().endswith('.pdf'):
-            print(filename, osp.exists(filename))
-            with open(filename, 'rb') as f:
-                reader = pdf.PdfFileReader(f, strict=False)
-                total_pages = reader.getNumPages()
-                for i in range(total_pages):
-                    page = Page(reader, i, filename)
-                    self.pages[page.uuid] = page
-                    item = QtGui.QListWidgetItem(page.name)
-                    item.setData(QtCore.Qt.UserRole, page.uuid)
-                    self.listPages.addItem(item)
+        return pages
 
     def on_listFiles_dropped(self, links):
         print("filesDropped:", links)
