@@ -237,26 +237,50 @@ class WndMain(QtGui.QMainWindow):
             self.listFiles.setCurrentRow(last-row, QtGui.QItemSelectionModel.Select)
 
     def load_pages_from_rows(self, rows):
-        for item in [self.listFiles.item(row) for row in rows]:
-            filename = item.data(QtCore.Qt.ToolTipRole)
+        pitems = []
+        try:
+            if self.radioFileLoadSelBef.isChecked():
+                to_row = self.listPages.row(self.listPages.selectedItems()[0])
+            elif self.radioFileLoadSelAft.isChecked():
+                to_row = self.listPages.row(self.listPages.selectedItems()[-1])+1
+            else:
+                to_row = self.listPages.count()
+        except:
+            to_row = self.listPages.count()
+        for fitem in [self.listFiles.item(row) for row in rows]:
+            filename = fitem.data(QtCore.Qt.ToolTipRole)
             pages = self.load_pages(filename)
             for page in pages:
                 self.pages[page.uuid] = page
-                item = QtGui.QListWidgetItem(page.name)
-                item.setData(QtCore.Qt.UserRole, page.uuid)
-                self.listPages.addItem(item)
+                pitem = QtGui.QListWidgetItem(page.name)
+                pitem.setData(QtCore.Qt.UserRole, page.uuid)
+                if self.radioFileLoadEnd.isChecked():
+                    self.listPages.addItem(pitem)
+                else:
+                    self.listPages.insertItem(to_row, pitem)
+                    to_row += 1
+                pitems.append(pitem)
+        return pitems
+
 
     @QtCore.pyqtSlot()
     def on_btnFileLoad_clicked(self):
         # sort by row, otherwise it's selection order
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
         rows.sort()
-        self.load_pages_from_rows(rows)
+        pitems = self.load_pages_from_rows(rows)
+        self.listPages.selectionModel().clear()
+        for item in pitems:
+            item.setSelected(True)
+
 
     @QtCore.pyqtSlot()
     def on_btnFileLoadAll_clicked(self):
         rows = range(self.listFiles.count())
-        self.load_pages_from_rows(rows)
+        pitems = self.load_pages_from_rows(rows)
+        self.listPages.selectionModel().clear()
+        for item in pitems:
+            item.setSelected(True)
 
     @QtCore.pyqtSlot()
     def on_btnFileSortAsc_clicked(self):

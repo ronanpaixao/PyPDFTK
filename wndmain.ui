@@ -184,6 +184,32 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="radioFileLoadEnd">
+           <property name="text">
+            <string>at end</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioFileLoadSelBef">
+           <property name="text">
+            <string>before
+selection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioFileLoadSelAft">
+           <property name="text">
+            <string>after
+selection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="btnFileLoad">
            <property name="minimumSize">
             <size>
