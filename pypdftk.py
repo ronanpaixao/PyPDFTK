@@ -13,7 +13,7 @@ import os.path as osp
 import uuid
 from cStringIO import StringIO
 import subprocess
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 # Setup PyQt's v2 APIs
 import sip
@@ -73,31 +73,32 @@ class Page(object):
         if self.transforms.endswith('↻↻↻'):
             self.transforms = self.transforms[:-3]+'↺'
 
-    def merge(self, page):
+    def merge(self, page, tx=0.0, ty=0.0, stamp=False):
         page2 = page.obj
         rotation = int(page2.get("/Rotate") or 0) % 360
         scale = Decimal(1.)
         # rotation is clockwise. tx, ty in page1 coordinates: x = right; y = up
-        if rotation == 0:
-            tx = 0
-            ty = 0
-        elif rotation == 90:
-            tx = 0
-            ty = self.obj.mediaBox.getHeight()
+        print(page.name, tx, ty)
+        if rotation == 90:
+#            tx += 0
+            ty += self.obj.mediaBox.getHeight()
         elif rotation == 180:
-            tx = -page2.mediaBox.getWidth()*scale
-            ty = self.obj.mediaBox.getHeight()
+            tx += page2.mediaBox.getWidth()*scale
+            ty += self.obj.mediaBox.getHeight()
         elif rotation == 270:
-            tx = -page2.mediaBox.getHeight()*scale
-            ty = self.obj.mediaBox.getHeight() - page2.mediaBox.getWidth()*scale
-        self.obj.mergeRotatedScaledTranslatedPage(page2, -rotation, scale, -tx, ty)
+            tx += page2.mediaBox.getHeight()*scale
+            ty += self.obj.mediaBox.getHeight() - page2.mediaBox.getWidth()*scale
+        self.obj.mergeRotatedScaledTranslatedPage(page2, -rotation, scale, tx, ty)
         # Adjust name
-        if self._basename == page._basename:
-            self._numbers.append(','.join(page._numbers))
+        if stamp:
+            self.transforms += "⊙"
         else:
-            self._numbers.append(u"{0}<{1}>".format(page._basename,
-                                 ','.join(page._numbers)))
-        self.transforms += "M"
+            if self._basename == page._basename:
+                self._numbers.append(','.join(page._numbers))
+            else:
+                self._numbers.append(u"{0}<{1}>".format(page._basename,
+                                     ','.join(page._numbers)))
+            self.transforms += "M"
 
     @property
     def name(self):
@@ -121,6 +122,9 @@ class WndMain(QtGui.QMainWindow):
                                        ";;PDF file (*.pdf)"
                                        ";;JPEG file (*.jpg *.jpeg)"
                                        ";;All files (*.*)")
+        validator = QtGui.QDoubleValidator()
+        self.lineStampX.setValidator(validator)
+        self.lineStampY.setValidator(validator)
 #        QtCore.QMetaObject.connectSlotsByName(self)
         self.show()
 
@@ -408,6 +412,38 @@ class WndMain(QtGui.QMainWindow):
             del self.pages[merged_page_uuid]
             self.listPages.takeItem(row)
             first_item.setText(first_page.name)
+
+    @QtCore.pyqtSlot()
+    def on_btnPageStamp_clicked(self):
+        if len(self.listPages.selectedItems()) == 0:
+            QtGui.QMessageBox.warning(self, self.tr("Warning"),
+                                       self.tr("You must select at least "
+                                               "one page to stamp."))
+            return
+        try:
+            tx = Decimal(self.lineStampX.text() or 0)
+            ty = Decimal(self.lineStampY.text() or 0)
+        except InvalidOperation:
+            QtGui.QMessageBox.critical(self, self.tr("Error"),
+                                       self.tr("x and y must be numbers."))
+            return
+        # 1 PDF unit = 1/72 inches
+        if self.radioStampCm.isChecked():
+            mult = 72/Decimal(2.54)
+        else:
+            mult = 72/Decimal(1.0)
+        filename = QtGui.QFileDialog.getOpenFileName(self,
+                                                     self.tr('Open file'),
+                                                     "",
+                                                     self.supported_files)
+        print("Stamp:", filename, mult, tx, ty, len(self.listPages.selectedItems()))
+        page2 = self.load_pages(filename)[0]  # Always first page
+        print(page2)
+        sys.stdout.flush()
+        for item in self.listPages.selectedItems():
+            page1 = self.pages[item.data(QtCore.Qt.UserRole)]
+            page1.merge(page2, tx*mult, ty*mult, True)
+            item.setText(page1.name)
 
     @QtCore.pyqtSlot()
     def on_btnPageSelectAll_clicked(self):
