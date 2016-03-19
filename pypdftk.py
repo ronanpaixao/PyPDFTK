@@ -395,6 +395,9 @@ class WndMain(QtGui.QMainWindow):
         rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
         rows.sort()
         if len(rows)<2:
+            QtGui.QMessageBox.warning(self, self.tr("Warning"),
+                                       self.tr("You must select at least "
+                                               "two pages to merge."))
             return
         first_item = self.listPages.item(rows[0])
         variant = first_item.data(QtCore.Qt.UserRole)
