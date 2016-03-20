@@ -58,3 +58,5 @@ comps/
 
 build-*
 unicode_test*
+test_data/
+*.ico
