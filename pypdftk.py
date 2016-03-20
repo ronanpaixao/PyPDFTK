@@ -27,6 +27,8 @@ from PyQt4 import QtCore, QtGui, uic, Qt
 
 import PyPDF2 as pdf
 
+# Need to import promoted qt classes, to make py2exe process them.
+import dragdroplist
 
 if sys.platform == 'darwin':
     def show_file(path):
@@ -144,7 +146,7 @@ class WndMain(QtGui.QMainWindow):
         validator = QtGui.QDoubleValidator()
         self.lineStampX.setValidator(validator)
         self.lineStampY.setValidator(validator)
-#        QtCore.QMetaObject.connectSlotsByName(self)
+
         self.show()
 
     def open_file(self, filename):
