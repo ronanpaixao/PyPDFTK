@@ -15,17 +15,21 @@ from cStringIO import StringIO
 import subprocess
 from decimal import Decimal, InvalidOperation
 import copy
+from PIL import Image
 
-# Setup PyQt's v2 APIs
+#%% Setup PyQt's v2 APIs
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl",
              "QVariant"]
 API_VERSION = 2
 for name in API_NAMES:
     sip.setapi(name, API_VERSION)
+#%%
 from PyQt4 import QtCore, QtGui, uic, Qt
 
 import PyPDF2 as pdf
+
+import pdf_images
 
 # Need to import promoted qt classes, to make py2exe process them.
 import dragdroplist
@@ -45,20 +49,46 @@ elif sys.platform == 'win32':
         subprocess.Popen(['explorer', '/select,', path])
     open_default_program = os.startfile
 
-
+#%%
 class Page(object):
-    def __init__(self, reader, page_number, filename):
+    def __init__(self):
         self.tmp = StringIO()
-        output = pdf.PdfFileWriter()
-        output.addPage(reader.getPage(page_number))
-        output.write(self.tmp)
+        self.uuid = uuid.uuid4()
+        self.obj = None
+        self.transforms = ""
+        self._numbers = []
+        self._basename = "Invalid Page"
+
+    def reload_from_buffer(self):
         self.tmp.seek(0)
         reader = pdf.PdfFileReader(self.tmp, strict=False)
-        self.uuid = uuid.uuid4()
         self.obj = reader.getPage(0)
-        self._numbers = [str(page_number + 1)]
-        self.transforms = ""
-        self._basename = osp.basename(filename)
+
+    @classmethod
+    def from_file(cls, filename):
+        pages = []
+        with open(filename, 'rb') as f:
+            reader = pdf.PdfFileReader(f, strict=False)
+            total_pages = reader.getNumPages()
+            for page_number in range(total_pages):
+                page = Page()
+                output = pdf.PdfFileWriter()
+                output.addPage(reader.getPage(page_number))
+                output.write(page.tmp)
+                page.reload_from_buffer()
+                page._numbers = [str(page_number + 1)]
+                page._basename = osp.basename(filename)
+                pages.append(page)
+        return pages
+
+    @classmethod
+    def from_image(cls, filename, page_size_cm):
+        page = Page()
+        page.tmp = pdf_images.image_to_pdf(filename, page_size_cm)
+        page.reload_from_buffer()
+        page._basename = osp.basename(filename)
+        page._numbers = ["I"]
+        return page
 
     def rotateLeft(self):
         self.obj.rotateCounterClockwise(90)
@@ -138,7 +168,12 @@ class WndMain(QtGui.QMainWindow):
         self.pages = {}
 
     def initUI(self):
-        uic.loadUi('wndmain.ui', self)
+        if getattr(sys, 'frozen', False):
+            print("FROZEN", sys._MEIPASS)
+            ui_file = osp.join(sys._MEIPASS, 'wndmain.ui')
+        else:
+            ui_file = 'wndmain.ui'
+        uic.loadUi(ui_file, self)
         self.supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg)"
                                        ";;PDF file (*.pdf)"
                                        ";;JPEG file (*.jpg *.jpeg)"
@@ -146,6 +181,7 @@ class WndMain(QtGui.QMainWindow):
         validator = QtGui.QDoubleValidator()
         self.lineStampX.setValidator(validator)
         self.lineStampY.setValidator(validator)
+        self.lineFileDPI.setValidator(validator)
 
         self.show()
 
@@ -163,15 +199,23 @@ class WndMain(QtGui.QMainWindow):
         pages = []
         try:
             if filename.lower().endswith('.pdf'):
-                with open(filename, 'rb') as f:
-                    reader = pdf.PdfFileReader(f, strict=False)
-                    total_pages = reader.getNumPages()
-                    for i in range(total_pages):
-                        page = Page(reader, i, filename)
-                        pages.append(page)
+                pages = Page.from_file(filename)
+            elif (filename.lower().endswith('.jpg') or
+                  filename.lower().endswith('.jpeg')):
+                img_size = Image.open(filename).size
+                try:
+                    dpi = float(self.lineFileDPI.text())
+                except:
+                    dpi = float(self.lineFileDPI.placeholderText())
+                img_size = (img_size[0]/dpi*2.54, img_size[1]/dpi*2.54)
+                pages.append(Page.from_image(filename, img_size))
         except Exception as e:
-            errormsg = (self.tr("Could not load <{}>:\n{}")
-                        .format(filename, e.strerror))
+            try:
+                errormsg = (self.tr("Could not load <{}>:\n{}")
+                            .format(filename, e.strerror))
+            except:
+                errormsg = (self.tr("Could not load <{}>:\n{}")
+                            .format(filename, e.message))
             QtGui.QMessageBox.warning(self, self.tr("Error"), errormsg)
         return pages
 
