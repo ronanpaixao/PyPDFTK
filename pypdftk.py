@@ -39,6 +39,7 @@ import pdf_images
 
 # Need to import promoted qt classes, to make py2exe process them.
 import dragdroplist
+import six
 
 if sys.platform == 'darwin':
     def show_file(path):
