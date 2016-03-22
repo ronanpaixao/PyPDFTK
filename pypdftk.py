@@ -1,6 +1,11 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar 17 12:11:22 2016
+The Python PDF Toolkit
+Copyright ©2016 Ronan Paixão
+Licensed under the terms of the MIT License.
+
+See LICENSE.txt for details.
 
 @author: Ronan Paixão
 """

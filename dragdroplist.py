@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar 17 15:55:01 2016
+The Python PDF Toolkit
+Copyright ©2016 Ronan Paixão
+Licensed under the terms of the MIT License.
+
+See LICENSE.txt for details.
 
 @author: Ronan Paixão
 """

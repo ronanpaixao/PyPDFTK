@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar 21 16:06:03 2016
+The Python PDF Toolkit
+Copyright ©2016 Ronan Paixão
+Licensed under the terms of the MIT License.
+
+See LICENSE.txt for details.
 
 Links:
 PDF format: http://www.adobe.com/content/dam/Adobe/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf

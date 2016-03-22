@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Mar 20 14:28:10 2016
+The Python PDF Toolkit
+Copyright ©2016 Ronan Paixão
+Licensed under the terms of the MIT License.
 
-@author: Ronan
+See LICENSE.txt for details.
+
+@author: Ronan Paixão
 """
 print("HERE###################")
 # Setup PyQt's v2 APIs
