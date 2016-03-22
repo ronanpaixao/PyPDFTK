@@ -181,9 +181,11 @@ class WndMain(QtGui.QMainWindow):
         else:
             ui_file = 'wndmain.ui'
         uic.loadUi(ui_file, self)
-        self.supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg)"
+        self.supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg"
+                                       " *.bmp *.gif *.j2p *.jpx *.png *.tiff)"
                                        ";;PDF file (*.pdf)"
-                                       ";;JPEG file (*.jpg *.jpeg)"
+                                       ";;Image file (*.jpg *.jpeg *.bmp *.gif"
+                                       " *.j2p *.jpx *.png *.tiff)"
                                        ";;All files (*.*)")
         validator = QtGui.QDoubleValidator()
         self.lineStampX.setValidator(validator)
@@ -205,10 +207,12 @@ class WndMain(QtGui.QMainWindow):
     def load_pages(self, filename):
         pages = []
         try:
-            if filename.lower().endswith('.pdf'):
+            image_exts = ['.jpg', '.jpeg', '.bmp', '.gif', '.j2p', '.jpx',
+                          '.png', '.tiff']
+            basefile, ext = osp.splitext(filename.lower())
+            if ext == '.pdf':
                 pages = Page.from_file(filename)
-            elif (filename.lower().endswith('.jpg') or
-                  filename.lower().endswith('.jpeg')):
+            elif ext in image_exts:
                 img_size = Image.open(filename).size
                 try:
                     dpi = float(self.lineFileDPI.text())
