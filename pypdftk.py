@@ -21,6 +21,7 @@ import subprocess
 from decimal import Decimal, InvalidOperation
 import copy
 from PIL import Image
+import ctypes
 
 #%% Setup PyQt's v2 APIs
 import sip
@@ -645,6 +646,8 @@ class WndMain(QtGui.QMainWindow):
 
 #%%
 if __name__ == '__main__':
+    myappid = u'br.com.dapaixao.pypdftk.1.0'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     existing = QtGui.qApp.instance()
     if existing:
         app = existing
