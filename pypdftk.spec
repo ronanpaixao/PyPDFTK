@@ -13,10 +13,19 @@ st_path = r'build\pypdftk\setuptools-19.2-py2.7.egg'
 if osp.exists(st_path):
     import shutil
     shutil.rmtree(st_path)
+
+# Convert logo PNG to ICO
+png_filename = r'logo.png'
+#icon_sizes = [(16,16), (32, 32), (48, 48), (64,64), (128,128)]
+from PIL import Image
+ico_img = Image.open(png_filename)
+ico_img.save('build/logo.ico')
+
 a = Analysis(['pypdftk.py'],
              pathex=['D:\\workspace\\PyPDFTK'],
              binaries=None,
              datas=[('wndmain.ui', '.'),
+                    ('build/logo.ico', '.'),
                     ('logo.png', '.')],
              hiddenimports=[],
              hookspath=[],
@@ -45,7 +54,7 @@ exe = EXE(pyz,
           #strip=True,
           upx=True,
           #console=False,
-          icon='logo128x128.ico',)
+          icon='build/logo.ico')
 
 if not single_file:
     coll = COLLECT(exe,
