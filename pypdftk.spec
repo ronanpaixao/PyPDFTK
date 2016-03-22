@@ -4,6 +4,15 @@ block_cipher = None #pyi_crypto.PyiBlockCipher(key='fookey')
 
 single_file = True
 
+# Compiling to EXE requires setuptools 19.2
+# > conda remove setuptools
+# > conda install setuptools=19.2
+
+import os.path as osp
+st_path = r'build\pypdftk\setuptools-19.2-py2.7.egg'
+if osp.exists(st_path):
+    import shutil
+    shutil.rmtree(st_path)
 a = Analysis(['pypdftk.py'],
              pathex=['D:\\workspace\\PyPDFTK'],
              binaries=None,
