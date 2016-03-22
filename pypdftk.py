@@ -632,7 +632,15 @@ class WndMain(QtGui.QMainWindow):
                 page_uuid = item.data(QtCore.Qt.UserRole)
                 i = pdf_images.extract_images(self.pages[page_uuid].obj, filename, i)
 
-
+    @QtCore.pyqtSlot()
+    def on_btnCredits_clicked(self):
+        if getattr(sys, 'frozen', False):
+            ui_file = osp.join(sys._MEIPASS, 'about.ui')
+        else:
+            ui_file = 'about.ui'
+        dialog = QtGui.QDialog()
+        uic.loadUi(ui_file, dialog)
+        dialog.exec_()
 
 
 #%%

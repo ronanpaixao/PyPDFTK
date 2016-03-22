@@ -642,26 +642,9 @@ selection</string>
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="label_18">
+        <widget class="QPushButton" name="btnCredits">
          <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>logo.png</pixmap>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_19">
-         <property name="text">
-          <string>PyDFTK©2016
-Ronan Paixão</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string>Credits</string>
          </property>
         </widget>
        </item>
