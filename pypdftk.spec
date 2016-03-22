@@ -48,7 +48,7 @@ else:
 exe = EXE(pyz,
           a.scripts,
           *exe_files,
-          #exclude_binaries=True,
+          exclude_binaries=not single_file,
           name='pypdftk',
           debug=False,
           #strip=True,
@@ -63,4 +63,4 @@ if not single_file:
                    a.datas,
                    strip=False,
                    upx=True,
-                   name='pydftk')
+                   name='pypdftk')
