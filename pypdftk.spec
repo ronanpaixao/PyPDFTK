@@ -31,12 +31,69 @@ a = Analysis(['pypdftk.py'],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=['rthook.py'],
-             excludes=['PyQt4.QtWebKit'],
+             excludes=['PyQt4.QtWebKit',
+                       'PyQt4.QtNetwork',
+                       'PyQt4.QtOpenGL',
+                       'PyQt4.QtSvg',
+                       'PyQt4.QtTest',
+                       'PyQt4.QtXml',
+                      ],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
+exclude_starts = [
+    'qt4_plugins',
+    '_cffi',
+    #'_ctypes',
+    '_hashlib',
+    '_ssl',
+    '_tkinter',
+    '_win32',
+    'bz2',
+    'mfc',
+    'msvcm90',
+    'msvcr90',
+    'msvcp90',
+    'PyQt4.QtSql',
+    'QtOpenGL',
+    'QtSql',
+    'QtSvg',
+    'QtXml',
+    'tcl85',
+    'tk85',
+    'unicodedata',
+    'win32evtlog',
+    'win32pipe',
+    'win32trace',
+    'win32wnet',
+    'win32ui',
+    'select',
+]
+def include_binary(binary):
+    for start in exclude_starts:
+        if binary.startswith(start):
+            return False
+    return True
+
+a.binaries = [binary for binary in a.binaries if include_binary(binary[0])]
+
+exclude_datas = [
+    r'tcl\encoding',
+    r'tcl\tzdata',
+    r'tcl\msgs',
+    r'tk\images',
+    r'tk\msgs',
+]
+def include_data(data):
+    for start in exclude_datas:
+        if data.startswith(start):
+            return False
+    return True
+
+a.datas = [data for data in a.datas if include_data(data[0])]
 
 if single_file:
     exe_files = [
