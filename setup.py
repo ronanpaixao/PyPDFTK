@@ -45,15 +45,21 @@ setup(
 )
 os.remove(tf.name)
 
-setup(
+setup_dict = dict(
     data_files = data_files,
     options = {'py2exe': {
         'bundle_files': 3,  # py2exe doesn't support bundling on py_win64
         'compressed': True,
         "includes" : ["sip", ],
-        "excludes": ["PyQt4.uic.port_v3"]
+        "excludes": ["PyQt4.uic.port_v3",
+                     '_ssl',  # Exclude _ssl
+                     'pyreadline', 'difflib', 'doctest', 'locale',
+                     'optparse', 'pickle', 'calendar'],  # Exclude standard library
         }},
     windows = [{'script': "pypdftk.py",
                 "icon_resources": icon_resources}],
     zipfile = None,
 )
+
+setup(**setup_dict)
+setup(**setup_dict)
