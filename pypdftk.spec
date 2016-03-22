@@ -1,7 +1,5 @@
 # -*- mode: python -*-
 
-block_cipher = None #pyi_crypto.PyiBlockCipher(key='fookey')
-
 single_file = True
 
 # Compiling to EXE requires setuptools 19.2
@@ -20,6 +18,8 @@ png_filename = r'logo.png'
 from PIL import Image
 ico_img = Image.open(png_filename)
 ico_img.save('build/logo.ico')
+
+block_cipher = None #pyi_crypto.PyiBlockCipher(key='fookey')
 
 a = Analysis(['pypdftk.py'],
              pathex=['D:\\workspace\\PyPDFTK'],
@@ -111,7 +111,7 @@ exe = EXE(pyz,
           debug=False,
           #strip=True,
           upx=True,
-          #console=False,
+          console=False,
           icon='build/logo.ico')
 
 if not single_file:

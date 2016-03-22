@@ -20,7 +20,6 @@ from cStringIO import StringIO
 import subprocess
 from decimal import Decimal, InvalidOperation
 import copy
-from PIL import Image
 import ctypes
 
 #%% Setup PyQt's v2 APIs
@@ -31,9 +30,10 @@ API_VERSION = 2
 for name in API_NAMES:
     sip.setapi(name, API_VERSION)
 #%%
-from PyQt4 import QtCore, QtGui, uic, Qt
+from PyQt4 import QtCore, QtGui, uic
 
 import PyPDF2 as pdf
+from PIL import Image
 
 import pdf_images
 
@@ -176,7 +176,6 @@ class WndMain(QtGui.QMainWindow):
 
     def initUI(self):
         if getattr(sys, 'frozen', False):
-            print("FROZEN", sys._MEIPASS)
             ui_file = osp.join(sys._MEIPASS, 'wndmain.ui')
         else:
             ui_file = 'wndmain.ui'
@@ -238,7 +237,6 @@ class WndMain(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def on_btnFileAdd_clicked(self):
-        print("on_btnFileAdd_clicked")
         filenames = QtGui.QFileDialog.getOpenFileNames(self,
                                                        self.tr('Open file'),
                                                        "",
@@ -268,7 +266,6 @@ class WndMain(QtGui.QMainWindow):
         # Ignore rows already on top
         first_rows = []
         first_row = 0
-        print(rows)
         for row in rows[:]:
             if row == first_row:
                 first_rows.append(row)
@@ -277,7 +274,6 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listFiles.item(row) for row in rows]:
             row = self.listFiles.row(item)
             self.listFiles.insertItem(row-1, self.listFiles.takeItem(row))
-        print(first_rows,rows)
         sys.stdout.flush()
         for row in first_rows + map(lambda r: r-1, rows):
             self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
@@ -289,7 +285,6 @@ class WndMain(QtGui.QMainWindow):
         # Ignore rows already on top
         last_rows = []
         last_row = self.listFiles.count() - 1
-        print(rows)
         for row in rows[:]:
             if row == last_row:
                 last_rows.append(row)
@@ -298,7 +293,6 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listFiles.item(row) for row in rows]:
             row = self.listFiles.row(item)
             self.listFiles.insertItem(row+1, self.listFiles.takeItem(row))
-        print(last_rows,rows)
         sys.stdout.flush()
         for row in last_rows + map(lambda r: r+1, rows):
             self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
@@ -413,7 +407,6 @@ class WndMain(QtGui.QMainWindow):
         # Ignore rows already on top
         first_rows = []
         first_row = 0
-        print(rows)
         for row in rows[:]:
             if row == first_row:
                 first_rows.append(row)
@@ -431,7 +424,6 @@ class WndMain(QtGui.QMainWindow):
         # Ignore rows already on top
         last_rows = []
         last_row = self.listPages.count() - 1
-        print(rows)
         for row in rows[:]:
             if row == last_row:
                 last_rows.append(row)
@@ -483,7 +475,6 @@ class WndMain(QtGui.QMainWindow):
         for item in [self.listPages.item(row) for row in rows[1:]]:
             row = self.listPages.row(item)
             merged_page_uuid = item.data(QtCore.Qt.UserRole)
-#            print("merging", first_page.name, 'to', self.pages[merged_page_uuid].name)
             first_page.merge(self.pages[merged_page_uuid])
             del self.pages[merged_page_uuid]
             self.listPages.takeItem(row)
@@ -512,9 +503,7 @@ class WndMain(QtGui.QMainWindow):
                                                      self.tr('Open file'),
                                                      "",
                                                      self.supported_files)
-        print("Stamp:", filename, mult, tx, ty, len(self.listPages.selectedItems()))
         page2 = self.load_pages(filename)[0]  # Always first page
-        print(page2)
         sys.stdout.flush()
         for item in self.listPages.selectedItems():
             page1 = self.pages[item.data(QtCore.Qt.UserRole)]
@@ -658,7 +647,6 @@ if __name__ == '__main__':
         app = existing
     else:
         app = QtGui.QApplication(sys.argv)
-    print(app.font().exactMatch())
     wnd = WndMain()
     if existing:
         self = wnd

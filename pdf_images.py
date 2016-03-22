@@ -57,7 +57,7 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 
     i = start_index
     for obj in xObject:
-        print("extracting to", filename_prefix, i)
+        print("extracting to {}{:04}.xxx".format(filename_prefix, i))
         if xObject[obj]['/Subtype'] == '/Image':
             size = (xObject[obj]['/Width'], xObject[obj]['/Height'])
             color_space = xObject[obj]['/ColorSpace']

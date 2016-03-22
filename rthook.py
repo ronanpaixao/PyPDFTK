@@ -8,7 +8,7 @@ See LICENSE.txt for details.
 
 @author: Ronan Paixão
 """
-print("HERE###################")
+
 # Setup PyQt's v2 APIs
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl",
