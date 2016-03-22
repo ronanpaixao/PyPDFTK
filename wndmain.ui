@@ -267,7 +267,7 @@ selection</string>
     <item>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">
-       <string>Manipulate pages</string>
+       <string>Manipulate pages (allows dragging pages):</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
