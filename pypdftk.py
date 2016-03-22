@@ -597,6 +597,7 @@ class WndMain(QtGui.QMainWindow):
                         "to overwrite it. Aborting.").format(filename_i)
                     QtGui.QMessageBox.critical(self, self.tr("Error"),
                                                errmsg)
+                    return
             for i, item in enumerate([self.listPages.item(row) for row in rows]):
                 filename_i = "{}{:04}.pdf".format(fileprefix, i)
                 output_pdf = pdf.PdfFileWriter()
@@ -606,6 +607,26 @@ class WndMain(QtGui.QMainWindow):
                     output_pdf.write(f)
                 if self.chkOpenOnSave.isChecked():
                     open_default_program(filename)
+
+    @QtCore.pyqtSlot()
+    def on_btnExtractImages_clicked(self):
+        if self.listPages.count() == 0:
+            QtGui.QMessageBox.critical(self, self.tr("Error"),
+                                       self.tr("No pages to look for images!"))
+            return
+        supported_files = self.tr("Image file prefix (*.*)")
+        filename = QtGui.QFileDialog.getSaveFileName(self,
+                                                     self.tr('Save file'),
+                                                     "",
+                                                     supported_files)
+        if filename:
+            fileprefix, ext = osp.splitext(filename)
+            rows = range(self.listPages.count())
+            i = 0
+            for item in [self.listPages.item(row) for row in rows]:
+                page_uuid = item.data(QtCore.Qt.UserRole)
+                i = pdf_images.extract_images(self.pages[page_uuid].obj, filename, i)
+
 
 
 

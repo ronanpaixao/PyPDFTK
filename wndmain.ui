@@ -571,6 +571,13 @@ selection</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>PDF:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btnWriteSingle">
          <property name="text">
           <string>Write to single file</string>
@@ -591,6 +598,33 @@ selection</string>
          </property>
          <property name="checked">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::HLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>JPG:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnExtractImages">
+         <property name="toolTip">
+          <string>This saves images from file with a selected prefix. The file extension is chosen according to the image format (PNG, JPG, JP2 or TIFF).</string>
+         </property>
+         <property name="text">
+          <string>Extract images from PDF</string>
          </property>
         </widget>
        </item>
