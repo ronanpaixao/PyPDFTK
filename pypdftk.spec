@@ -2,9 +2,13 @@
 
 single_file = True
 
-# Compiling to EXE requires setuptools 19.2
-# > conda remove setuptools
-# > conda install setuptools=19.2
+import setuptools
+if setuptools.__version__ != '19.2':
+    raise RuntimeError('''
+Compiling to EXE requires setuptools 19.2
+> conda remove setuptools
+> conda install setuptools=19.2
+''')
 
 import os.path as osp
 st_path = r'build\pypdftk\setuptools-19.2-py2.7.egg'
