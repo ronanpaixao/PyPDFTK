@@ -44,7 +44,7 @@ class DragDropList(QtGui.QListWidget):
             event.accept()
             links = []
             for url in event.mimeData().urls():
-                links.append(str(url.toLocalFile()))
+                links.append(unicode(url.toLocalFile()))
             self.dropped.emit(links)
         else:
             super(DragDropList, self).dropEvent(event)
