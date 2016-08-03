@@ -559,6 +559,7 @@ class WndMain(QtGui.QMainWindow):
                                                      "",
                                                      supported_files)
         if filename:
+            filename = filename.replace("/", osp.sep)
             output_pdf = pdf.PdfFileWriter()
             rows = range(self.listPages.count())
             for item in [self.listPages.item(row) for row in rows]:
@@ -587,6 +588,7 @@ class WndMain(QtGui.QMainWindow):
                                                      "",
                                                      supported_files)
         if filename:
+            filename = filename.replace("/", osp.sep)
             fileprefix = osp.splitext(filename)[0]
             rows = range(self.listPages.count())
             # pre-check filenames to see if we're overwriting something
@@ -606,7 +608,7 @@ class WndMain(QtGui.QMainWindow):
                 with open(filename_i, 'wb') as f:
                     output_pdf.write(f)
                 if self.chkOpenOnSave.isChecked():
-                    open_default_program(filename)
+                    open_default_program(filename_i)
 
     @QtCore.pyqtSlot()
     def on_btnExtractImages_clicked(self):
