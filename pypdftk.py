@@ -56,6 +56,16 @@ elif sys.platform == 'win32':
         subprocess.Popen(['explorer', '/select,', path])
     open_default_program = os.startfile
 
+#%% PyInstaller Utilities
+def frozen(filename):
+    """Returns the filename for a frozen file (program file which may be
+    included inside the executable created by PyInstaller).
+    """
+    if getattr(sys, 'frozen', False):
+        return osp.join(sys._MEIPASS, filename)
+    else:
+        return filename
+
 #%%
 class Page(object):
     def __init__(self):
@@ -175,10 +185,7 @@ class WndMain(QtGui.QMainWindow):
         self.pages = {}
 
     def initUI(self):
-        if getattr(sys, 'frozen', False):
-            ui_file = osp.join(sys._MEIPASS, 'wndmain.ui')
-        else:
-            ui_file = 'wndmain.ui'
+        ui_file = frozen(osp.join('data', 'wndmain.ui'))
         uic.loadUi(ui_file, self)
         self.supported_files = self.tr("Supported files (*.pdf *.jpg *.jpeg"
                                        " *.bmp *.gif *.j2p *.jpx *.png *.tiff)"
@@ -631,10 +638,7 @@ class WndMain(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def on_btnCredits_clicked(self):
-        if getattr(sys, 'frozen', False):
-            ui_file = osp.join(sys._MEIPASS, 'about.ui')
-        else:
-            ui_file = 'about.ui'
+        ui_file = frozen(osp.join('data', 'about.ui'))
         dialog = QtGui.QDialog()
         uic.loadUi(ui_file, dialog)
         dialog.exec_()

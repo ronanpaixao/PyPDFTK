@@ -1,23 +1,27 @@
 # -*- mode: python -*-
 
 single_file = True
+name = "PyPDFTK"
 
+import sys
 import setuptools
 if setuptools.__version__ != '19.2':
     raise RuntimeError('''
 Compiling to EXE requires setuptools 19.2
-> conda remove setuptools
 > conda install setuptools=19.2
 ''')
 
 import os.path as osp
-st_path = r'build\pypdftk\setuptools-19.2-py2.7.egg'
+st_path = osp.join('build', 'pypdftk', 'setuptools-{}-py{}.{}.egg'
+    .format(setuptools.__version__, 
+    sys.version_info.major, 
+    sys.version_info.minor))
 if osp.exists(st_path):
     import shutil
     shutil.rmtree(st_path)
 
 # Convert logo PNG to ICO
-png_filename = r'logo.png'
+png_filename = osp.join('data', 'logo.png')
 #icon_sizes = [(16,16), (32, 32), (48, 48), (64,64), (128,128)]
 from PIL import Image
 ico_img = Image.open(png_filename)
@@ -25,13 +29,16 @@ ico_img.save('build/logo.ico')
 
 block_cipher = None #pyi_crypto.PyiBlockCipher(key='fookey')
 
+# All files from "data" directory
+datas = []
+for r, d, fs in os.walk("data"):
+    datas.extend([(osp.join(r, f), r) for f in fs])
+datas.append(('build/logo.ico', '.'))
+    
 a = Analysis(['pypdftk.py'],
-             pathex=['D:\\workspace\\PyPDFTK'],
+             #pathex=['D:\\workspace\\PyPDFTK'],
              binaries=None,
-             datas=[('wndmain.ui', '.'),
-                    ('about.ui', '.'),
-                    ('build/logo.ico', '.'),
-                    ('logo.png', '.')],
+             datas=datas,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=['rthook.py'],
@@ -111,12 +118,12 @@ exe = EXE(pyz,
           a.scripts,
           *exe_files,
           exclude_binaries=not single_file,
-          name='pypdftk',
+          name=name,
           debug=False,
           #strip=True,
           upx=True,
           console=False,
-          icon='build/logo.ico')
+          icon=osp.join('build', 'logo.ico'))
 
 if not single_file:
     coll = COLLECT(exe,
@@ -125,4 +132,4 @@ if not single_file:
                    a.datas,
                    strip=False,
                    upx=True,
-                   name='pypdftk')
+                   name=name)
