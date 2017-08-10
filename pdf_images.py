@@ -19,9 +19,9 @@ TIFF format and tags: http://www.awaresystems.be/imaging/tiff/faq.html
 import struct
 
 from PIL import Image
-from cStringIO import StringIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
+from io import BytesIO
 
 import PyPDF2 as pdf
 
@@ -53,6 +53,8 @@ def tiff_header_for_CCITT(width, height, img_size, CCITT_group=4):
 
 def extract_images(page, filename_prefix="IMG_", start_index=0):
 
+    if '/XObject' not in page['/Resources']:
+        return start_index
     xObject = page['/Resources']['/XObject'].getObject()
 
     i = start_index
@@ -110,7 +112,7 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 
 
 def image_to_pdf(image_filename, page_size_cm):
-    tmp = StringIO()
+    tmp = BytesIO()
     image_reader = ImageReader(image_filename)
     size_pdf = [s/2.54*72 for s in page_size_cm] # cm->in->1/72" (PDF unit)
     output_pdf = canvas.Canvas(tmp, pagesize=size_pdf)
