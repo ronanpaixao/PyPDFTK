@@ -624,7 +624,7 @@ class WndMain(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                        self.tr("No pages to look for images!"))
             return
-        supported_files = self.tr("Image file prefix (*.*)")
+        supported_files = self.tr("Image file prefix (*)")
         filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
                                                      "",
