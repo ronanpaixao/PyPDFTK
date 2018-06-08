@@ -44,7 +44,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;PyPDFTK 1.0&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Python PDF Toolkit&lt;br/&gt;Copyright ©2016 Ronan Paixão&lt;br/&gt;Licensed under the terms of the MIT License.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/ronanpaixao/PyPDFTK&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub repository&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Despite similar naming, this project is not associated, affiliated nor endorsed by PDFTK.&lt;/p&gt;&lt;p&gt;This program makes use of the following libraries and programs, with respective licenses:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;PyPDFTK 1.1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Python PDF Toolkit&lt;br/&gt;Copyright ©2016 Ronan Paixão&lt;br/&gt;Licensed under the terms of the MIT License.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/ronanpaixao/PyPDFTK&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub repository&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Despite similar naming, this project is not associated, affiliated nor endorsed by PDFTK.&lt;/p&gt;&lt;p&gt;This program makes use of the following libraries and programs, with respective licenses:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -105,7 +105,7 @@ SOFTWARE.</string>
      </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>PyQt4</string>
+       <string>PyQt</string>
       </attribute>
       <attribute name="toolTip">
        <string>GPL License</string>
@@ -720,10 +720,6 @@ SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTW
     </widget>
    </item>
   </layout>
-  <zorder>tabWidget</zorder>
-  <zorder>buttonBox</zorder>
-  <zorder>label_19</zorder>
-  <zorder>label_18</zorder>
  </widget>
  <resources/>
  <connections>

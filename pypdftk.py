@@ -16,11 +16,16 @@ import sys
 import os
 import os.path as osp
 import uuid
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO as BytesIO
+except ModuleNotFoundError:  # Py3
+    from io import BytesIO
 import subprocess
 from decimal import Decimal, InvalidOperation
 import copy
 import ctypes
+import traceback
+
 
 #%% Setup PyQt's v2 APIs
 import sip
@@ -30,7 +35,7 @@ API_VERSION = 2
 for name in API_NAMES:
     sip.setapi(name, API_VERSION)
 #%%
-from PyQt4 import QtCore, QtGui, uic
+from qtpy import QtCore, QtGui, QtWidgets, uic
 
 import PyPDF2 as pdf
 from PIL import Image
@@ -69,7 +74,7 @@ def frozen(filename):
 #%%
 class Page(object):
     def __init__(self):
-        self.tmp = StringIO()
+        self.tmp = BytesIO()
         self.uuid = uuid.uuid4()
         self.obj = None
         self.transforms = ""
@@ -175,7 +180,7 @@ class Page(object):
                                        self.transforms)
 
 
-class WndMain(QtGui.QMainWindow):
+class WndMain(QtWidgets.QMainWindow):
     ######################
     ### Initialization ###
     ######################
@@ -204,9 +209,9 @@ class WndMain(QtGui.QMainWindow):
         filename = filename.replace("/", osp.sep)
         if not osp.exists(filename):
             errormsg = self.tr("File <{}> doesn't exist.").format(filename)
-            QtGui.QMessageBox.warning(self, self.tr("Error"), errormsg)
+            QtWidgets.QMessageBox.warning(self, self.tr("Error"), errormsg)
             return
-        item = QtGui.QListWidgetItem(osp.basename(filename))
+        item = QtWidgets.QListWidgetItem(osp.basename(filename))
         item.setData(QtCore.Qt.ToolTipRole, filename)
         self.listFiles.addItem(item)
 
@@ -227,13 +232,9 @@ class WndMain(QtGui.QMainWindow):
                 img_size = (img_size[0]/dpi*2.54, img_size[1]/dpi*2.54)
                 pages.append(Page.from_image(filename, img_size))
         except Exception as e:
-            try:
-                errormsg = (self.tr("Could not load <{}>:\n{}")
-                            .format(filename, e.strerror))
-            except:
-                errormsg = (self.tr("Could not load <{}>:\n{}")
-                            .format(filename, e.message))
-            QtGui.QMessageBox.warning(self, self.tr("Error"), errormsg)
+            errormsg = (self.tr("Could not load <{}>:\n{}")
+                            .format(filename, traceback.format_exc()))
+            QtWidgets.QMessageBox.warning(self, self.tr("Error"), errormsg)
         return pages
 
     def on_listFiles_dropped(self, links):
@@ -242,21 +243,21 @@ class WndMain(QtGui.QMainWindow):
         for link in links:
             self.open_file(link)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileAdd_clicked(self):
-        filenames = QtGui.QFileDialog.getOpenFileNames(self,
+        filenames = QtWidgets.QFileDialog.getOpenFileNames(self,
                                                        self.tr('Open file'),
                                                        "",
-                                                       self.supported_files)
+                                                       self.supported_files)[0]
         for filename in filenames:
             self.open_file(filename)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileRem_clicked(self):
         for item in self.listFiles.selectedItems():
             self.listFiles.takeItem(self.listFiles.row(item))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileTop_clicked(self):
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
         rows.sort(reverse=True)
@@ -264,9 +265,9 @@ class WndMain(QtGui.QMainWindow):
             row = self.listFiles.row(item)
             self.listFiles.insertItem(0, self.listFiles.takeItem(row))
         for row in range(len(rows)):
-            self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+            self.listFiles.setCurrentRow(row, QtCore.QItemSelectionModel.Select)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileUp_clicked(self):
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
         rows.sort()
@@ -282,10 +283,10 @@ class WndMain(QtGui.QMainWindow):
             row = self.listFiles.row(item)
             self.listFiles.insertItem(row-1, self.listFiles.takeItem(row))
         sys.stdout.flush()
-        for row in first_rows + map(lambda r: r-1, rows):
-            self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+        for row in first_rows + list(map(lambda r: r-1, rows)):
+            self.listFiles.setCurrentRow(row, QtCore.QItemSelectionModel.Select)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileDown_clicked(self):
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
         rows.sort(reverse=True)
@@ -301,10 +302,10 @@ class WndMain(QtGui.QMainWindow):
             row = self.listFiles.row(item)
             self.listFiles.insertItem(row+1, self.listFiles.takeItem(row))
         sys.stdout.flush()
-        for row in last_rows + map(lambda r: r+1, rows):
-            self.listFiles.setCurrentRow(row, QtGui.QItemSelectionModel.Select)
+        for row in last_rows + list(map(lambda r: r+1, rows)):
+            self.listFiles.setCurrentRow(row, QtCore.QItemSelectionModel.Select)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileBottom_clicked(self):
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
         rows.sort()
@@ -313,7 +314,7 @@ class WndMain(QtGui.QMainWindow):
             row = self.listFiles.row(item)
             self.listFiles.insertItem(last, self.listFiles.takeItem(row))
         for row in range(len(rows)):
-            self.listFiles.setCurrentRow(last-row, QtGui.QItemSelectionModel.Select)
+            self.listFiles.setCurrentRow(last-row, QtCore.QItemSelectionModel.Select)
 
     def load_pages_from_rows(self, rows):
         pitems = []
@@ -331,7 +332,7 @@ class WndMain(QtGui.QMainWindow):
             pages = self.load_pages(filename)
             for page in pages:
                 self.pages[page.uuid] = page
-                pitem = QtGui.QListWidgetItem(page.name)
+                pitem = QtWidgets.QListWidgetItem(page.name)
                 pitem.setData(QtCore.Qt.UserRole, page.uuid)
                 if self.radioFileLoadEnd.isChecked():
                     self.listPages.addItem(pitem)
@@ -342,7 +343,7 @@ class WndMain(QtGui.QMainWindow):
         return pitems
 
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileLoad_clicked(self):
         # sort by row, otherwise it's selection order
         rows = [self.listFiles.row(item) for item in self.listFiles.selectedItems()]
@@ -353,7 +354,7 @@ class WndMain(QtGui.QMainWindow):
             item.setSelected(True)
 
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileLoadAll_clicked(self):
         rows = range(self.listFiles.count())
         pitems = self.load_pages_from_rows(rows)
@@ -361,44 +362,44 @@ class WndMain(QtGui.QMainWindow):
         for item in pitems:
             item.setSelected(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileSortAsc_clicked(self):
         self.listFiles.sortItems(QtCore.Qt.AscendingOrder)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileSortDesc_clicked(self):
         self.listFiles.sortItems(QtCore.Qt.DescendingOrder)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFilesClear_clicked(self):
         self.listFiles.clear()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnFileOpenLoc_clicked(self):
         filename = self.listFiles.currentItem().data(QtCore.Qt.ToolTipRole)
         show_file(filename)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageRem_clicked(self):
         for item in self.listPages.selectedItems():
             page_uuid = item.data(QtCore.Qt.UserRole)
             del self.pages[page_uuid]
             self.listPages.takeItem(self.listPages.row(item))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageClear_clicked(self):
         self.listPages.clear()
         self.pages = {}
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageSortAsc_clicked(self):
         self.listPages.sortItems(QtCore.Qt.AscendingOrder)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageSortDesc_clicked(self):
         self.listPages.sortItems(QtCore.Qt.DescendingOrder)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageTop_clicked(self):
         rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
         rows.sort(reverse=True)
@@ -407,7 +408,7 @@ class WndMain(QtGui.QMainWindow):
             self.listPages.insertItem(0, self.listPages.takeItem(row))
             item.setSelected(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageUp_clicked(self):
         rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
         rows.sort()
@@ -424,7 +425,7 @@ class WndMain(QtGui.QMainWindow):
             self.listPages.insertItem(row-1, self.listPages.takeItem(row))
             item.setSelected(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageDown_clicked(self):
         rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
         rows.sort(reverse=True)
@@ -441,7 +442,7 @@ class WndMain(QtGui.QMainWindow):
             self.listPages.insertItem(row+1, self.listPages.takeItem(row))
             item.setSelected(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageBottom_clicked(self):
         rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
         rows.sort()
@@ -451,7 +452,7 @@ class WndMain(QtGui.QMainWindow):
             self.listPages.insertItem(last, self.listPages.takeItem(row))
             item.setSelected(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageRotLeft_clicked(self):
         for item in self.listPages.selectedItems():
             page_uuid = item.data(QtCore.Qt.UserRole)
@@ -459,7 +460,7 @@ class WndMain(QtGui.QMainWindow):
             page.rotateLeft()
             item.setText(page.name)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageRotRight_clicked(self):
         for item in self.listPages.selectedItems():
             page_uuid = item.data(QtCore.Qt.UserRole)
@@ -467,12 +468,12 @@ class WndMain(QtGui.QMainWindow):
             page.rotateRight()
             item.setText(page.name)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageMerge_clicked(self):
         rows = [self.listPages.row(item) for item in self.listPages.selectedItems()]
         rows.sort()
         if len(rows)<2:
-            QtGui.QMessageBox.warning(self, self.tr("Warning"),
+            QtWidgets.QMessageBox.warning(self, self.tr("Warning"),
                                        self.tr("You must select at least "
                                                "two pages to merge."))
             return
@@ -487,10 +488,10 @@ class WndMain(QtGui.QMainWindow):
             self.listPages.takeItem(row)
             first_item.setText(first_page.name)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageStamp_clicked(self):
         if len(self.listPages.selectedItems()) == 0:
-            QtGui.QMessageBox.warning(self, self.tr("Warning"),
+            QtWidgets.QMessageBox.warning(self, self.tr("Warning"),
                                        self.tr("You must select at least "
                                                "one page to stamp."))
             return
@@ -498,7 +499,7 @@ class WndMain(QtGui.QMainWindow):
             tx = Decimal(self.lineStampX.text() or 0)
             ty = Decimal(self.lineStampY.text() or 0)
         except InvalidOperation:
-            QtGui.QMessageBox.critical(self, self.tr("Error"),
+            QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                        self.tr("x and y must be numbers."))
             return
         # 1 PDF unit = 1/72 inches
@@ -506,10 +507,10 @@ class WndMain(QtGui.QMainWindow):
             mult = 72/Decimal(2.54)
         else:
             mult = 72/Decimal(1.0)
-        filename = QtGui.QFileDialog.getOpenFileName(self,
+        filename = QtWidgets.QFileDialog.getOpenFileName(self,
                                                      self.tr('Open file'),
                                                      "",
-                                                     self.supported_files)
+                                                     self.supported_files)[0]
         page2 = self.load_pages(filename)[0]  # Always first page
         sys.stdout.flush()
         for item in self.listPages.selectedItems():
@@ -517,10 +518,10 @@ class WndMain(QtGui.QMainWindow):
             page1.merge(page2, tx*mult, ty*mult, "stamp")
             item.setText(page1.name)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageBackground_clicked(self):
         if len(self.listPages.selectedItems()) == 0:
-            QtGui.QMessageBox.warning(self, self.tr("Warning"),
+            QtWidgets.QMessageBox.warning(self, self.tr("Warning"),
                                        self.tr("You must select at least "
                                                "one page to apply background."))
             return
@@ -536,35 +537,35 @@ class WndMain(QtGui.QMainWindow):
                 tx = ty = Decimal(0)
                 mult = Decimal(1)
         except InvalidOperation:
-            QtGui.QMessageBox.critical(self, self.tr("Error"),
+            QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                        self.tr("x and y must be numbers."))
             return
 
-        filename = QtGui.QFileDialog.getOpenFileName(self,
+        filename = QtWidgets.QFileDialog.getOpenFileName(self,
                                                      self.tr('Open file'),
                                                      "",
-                                                     self.supported_files)
+                                                     self.supported_files)[0]
         page2 = self.load_pages(filename)[0]  # Always first page
         for item in self.listPages.selectedItems():
             page1 = self.pages[item.data(QtCore.Qt.UserRole)]
             page1.merge(page2, tx*mult, ty*mult, "background")
             item.setText(page1.name)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnPageSelectAll_clicked(self):
         self.listPages.selectAll()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnWriteSingle_clicked(self):
         if self.listPages.count() == 0:
-            QtGui.QMessageBox.critical(self, self.tr("Error"),
+            QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                        self.tr("No pages to save!"))
             return
         supported_files = self.tr("PDF file (*.pdf)")
-        filename = QtGui.QFileDialog.getSaveFileName(self,
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
                                                      "",
-                                                     supported_files)
+                                                     supported_files)[0]
         if filename:
             filename = filename.replace("/", osp.sep)
             output_pdf = pdf.PdfFileWriter()
@@ -581,19 +582,19 @@ class WndMain(QtGui.QMainWindow):
                 errmsg = self.tr("I/O error({0}): {1}\n"
                     "Please check if the file is open in another program."
                     ).format(e.errno, e.strerror)
-                QtGui.QMessageBox.critical(self, self.tr("Error"), errmsg)
+                QtWidgets.QMessageBox.critical(self, self.tr("Error"), errmsg)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnWriteMulti_clicked(self):
         if self.listPages.count() == 0:
-            QtGui.QMessageBox.critical(self, self.tr("Error"),
+            QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                        self.tr("No pages to save!"))
             return
         supported_files = self.tr("PDF file (*.pdf)")
-        filename = QtGui.QFileDialog.getSaveFileName(self,
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
                                                      "",
-                                                     supported_files)
+                                                     supported_files)[0]
         if filename:
             filename = filename.replace("/", osp.sep)
             fileprefix = osp.splitext(filename)[0]
@@ -604,7 +605,7 @@ class WndMain(QtGui.QMainWindow):
                 if osp.exists(filename_i):
                     errmsg = self.tr("File {} already exists!\nWe don't want "
                         "to overwrite it. Aborting.").format(filename_i)
-                    QtGui.QMessageBox.critical(self, self.tr("Error"),
+                    QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                                errmsg)
                     return
             for i, item in enumerate([self.listPages.item(row) for row in rows]):
@@ -617,17 +618,17 @@ class WndMain(QtGui.QMainWindow):
                 if self.chkOpenOnSave.isChecked():
                     open_default_program(filename_i)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnExtractImages_clicked(self):
         if self.listPages.count() == 0:
-            QtGui.QMessageBox.critical(self, self.tr("Error"),
+            QtWidgets.QMessageBox.critical(self, self.tr("Error"),
                                        self.tr("No pages to look for images!"))
             return
         supported_files = self.tr("Image file prefix (*.*)")
-        filename = QtGui.QFileDialog.getSaveFileName(self,
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
                                                      "",
-                                                     supported_files)
+                                                     supported_files)[0]
         if filename:
             fileprefix, ext = osp.splitext(filename)
             rows = range(self.listPages.count())
@@ -636,10 +637,10 @@ class WndMain(QtGui.QMainWindow):
                 page_uuid = item.data(QtCore.Qt.UserRole)
                 i = pdf_images.extract_images(self.pages[page_uuid].obj, filename, i)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btnCredits_clicked(self):
         ui_file = frozen(osp.join('data', 'about.ui'))
-        dialog = QtGui.QDialog()
+        dialog = QtWidgets.QDialog()
         uic.loadUi(ui_file, dialog)
         dialog.exec_()
 
@@ -648,11 +649,11 @@ class WndMain(QtGui.QMainWindow):
 if __name__ == '__main__':
     myappid = u'br.com.dapaixao.pypdftk.1.0'
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-    existing = QtGui.qApp.instance()
+    existing = QtWidgets.qApp.instance()
     if existing:
         app = existing
     else:
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
     wnd = WndMain()
     if existing:
         self = wnd

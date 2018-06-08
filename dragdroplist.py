@@ -11,12 +11,13 @@ See LICENSE.txt for details.
 
 from __future__ import division, unicode_literals, print_function
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtCore, QtWidgets
+from six import text_type
 
 
-class DragDropList(QtGui.QListWidget):
+class DragDropList(QtWidgets.QListWidget):
 
-    dropped = QtCore.pyqtSignal(list)
+    dropped = QtCore.Signal(list)
 
     def __init__(self, type, parent=None):
         super(DragDropList, self).__init__(parent)
@@ -44,7 +45,7 @@ class DragDropList(QtGui.QListWidget):
             event.accept()
             links = []
             for url in event.mimeData().urls():
-                links.append(unicode(url.toLocalFile()))
+                links.append(text_type(url.toLocalFile()))
             self.dropped.emit(links)
         else:
             super(DragDropList, self).dropEvent(event)

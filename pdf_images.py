@@ -19,7 +19,10 @@ TIFF format and tags: http://www.awaresystems.be/imaging/tiff/faq.html
 import struct
 
 from PIL import Image
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO as BytesIO
+except ModuleNotFoundError:  # Py3
+    from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
@@ -110,7 +113,7 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 
 
 def image_to_pdf(image_filename, page_size_cm):
-    tmp = StringIO()
+    tmp = BytesIO()
     image_reader = ImageReader(image_filename)
     size_pdf = [s/2.54*72 for s in page_size_cm] # cm->in->1/72" (PDF unit)
     output_pdf = canvas.Canvas(tmp, pagesize=size_pdf)
