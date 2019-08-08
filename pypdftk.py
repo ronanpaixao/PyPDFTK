@@ -16,21 +16,25 @@ import sys
 import os
 import os.path as osp
 import uuid
+try:
+    from cStringIO import StringIO as BytesIO
+except ModuleNotFoundError:  # Py3
+    from io import BytesIO
 import subprocess
 from decimal import Decimal, InvalidOperation
 import copy
 import ctypes
-from io import BytesIO
+import traceback
+
 
 #%% Setup PyQt's v2 APIs
-#import sip
-#API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl",
-#             "QVariant"]
-#API_VERSION = 2
-#for name in API_NAMES:
-#    sip.setapi(name, API_VERSION)
-##%%
-#from PyQt4 import QtCore, QtGui, uic
+import sip
+API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl",
+             "QVariant"]
+API_VERSION = 2
+for name in API_NAMES:
+    sip.setapi(name, API_VERSION)
+#%%
 from qtpy import QtCore, QtGui, QtWidgets, uic
 
 import PyPDF2 as pdf
@@ -230,7 +234,7 @@ class WndMain(QtWidgets.QMainWindow):
         except Exception as e:
             try:
                 errormsg = (self.tr("Could not load <{}>:\n{}")
-                            .format(filename, e.strerror))
+                            .format(filename, traceback.format_exc()))
             except:
                 errormsg = (self.tr("Could not load <{}>:\n{}")
                             .format(filename, e.message))

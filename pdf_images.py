@@ -20,6 +20,10 @@ import struct
 import base64
 
 from PIL import Image
+try:
+    from cStringIO import StringIO as BytesIO
+except ModuleNotFoundError:  # Py3
+    from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from io import BytesIO

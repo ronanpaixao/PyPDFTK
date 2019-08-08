@@ -12,6 +12,7 @@ See LICENSE.txt for details.
 from __future__ import division, unicode_literals, print_function
 
 from qtpy import QtCore, QtWidgets
+from six import text_type
 
 
 class DragDropList(QtWidgets.QListWidget):
@@ -44,7 +45,7 @@ class DragDropList(QtWidgets.QListWidget):
             event.accept()
             links = []
             for url in event.mimeData().urls():
-                links.append(url.toLocalFile())
+                links.append(text_type(url.toLocalFile()))
             self.dropped.emit(links)
         else:
             super(DragDropList, self).dropEvent(event)
