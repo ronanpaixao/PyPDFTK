@@ -17,6 +17,7 @@ TIFF format and tags: http://www.awaresystems.be/imaging/tiff/faq.html
     http://stackoverflow.com/questions/2693820/extract-images-from-pdf-without-resampling-in-python
 """
 import struct
+import base64
 
 from PIL import Image
 from reportlab.pdfgen import canvas
@@ -59,28 +60,46 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 
     i = start_index
     for obj in xObject:
-        print("extracting to {}{:04}.xxx".format(filename_prefix, i))
         if xObject[obj]['/Subtype'] == '/Image':
+            filt = xObject[obj]['/Filter']
+            print("extracting {} to {}{:04}.xxx".format(filt, filename_prefix, i))
             size = (xObject[obj]['/Width'], xObject[obj]['/Height'])
             color_space = xObject[obj]['/ColorSpace']
             if isinstance(color_space, pdf.generic.ArrayObject) and color_space[0] == '/Indexed':
                 color_space, base, hival, lookup = [v.getObject() for v in color_space] # pg 262
             mode = img_modes[color_space]
 
-            if xObject[obj]['/Filter'] == '/FlateDecode':
+            # xObject[obj].getData() does not work for DCTDecode, JPXDecode and
+            # CCITTFaxDecode
+            if '/FlateDecode' in filt:
                 data = xObject[obj].getData()
+            else:
+                data = xObject[obj]._data  #   # for /FlateDecode only?
+
+            if data.endswith(b'~>'):
+                data = base64.a85decode(data, adobe=True)
+
+            if isinstance(filt, list):
+                while len(filt) > 1:
+                    first_filter = filt.pop(0)
+                    if first_filter == '/ASCII85Decode':
+                        continue
+                    else:
+                        print("Unsupported filter:", first_filter)
+                        return i
+                filt = filt[0]
+
+            if filt == '/FlateDecode':
                 img = Image.frombytes(mode, size, data)
                 if color_space == '/Indexed':
                     img.putpalette(lookup.getData())
                     img = img.convert('RGB')
                 img.save("{}{:04}.png".format(filename_prefix, i))
-            elif xObject[obj]['/Filter'] == '/DCTDecode':
-                data = xObject[obj]._data
+            elif filt == '/DCTDecode':
                 img = open("{}{:04}.jpg".format(filename_prefix, i), "wb")
                 img.write(data)
                 img.close()
-            elif xObject[obj]['/Filter'] == '/JPXDecode':
-                data = xObject[obj]._data
+            elif filt == '/JPXDecode':
                 img = open("{}{:04}.jp2".format(filename_prefix, i), "wb")
                 img.write(data)
                 img.close()
@@ -93,14 +112,14 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 #            K < 0 --- Pure two-dimensional encoding (Group 4)
 #            K = 0 --- Pure one-dimensional encoding (Group 3, 1-D)
 #            K > 0 --- Mixed one- and two-dimensional encoding (Group 3, 2-D)
-            elif xObject[obj]['/Filter'] == '/CCITTFaxDecode':
+            elif filt == '/CCITTFaxDecode':
                 if xObject[obj]['/DecodeParms']['/K'] == -1:
                     CCITT_group = 4
                 else:
                     CCITT_group = 3
                 width = xObject[obj]['/Width']
                 height = xObject[obj]['/Height']
-                data = xObject[obj]._data  # sorry, getData() does not work for CCITTFaxDecode
+
                 img_size = len(data)
                 tiff_header = tiff_header_for_CCITT(width, height, img_size, CCITT_group)
                 img_name = "{}{:04}.tiff".format(filename_prefix, i)
