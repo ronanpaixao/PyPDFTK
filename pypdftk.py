@@ -192,6 +192,7 @@ class WndMain(QtWidgets.QMainWindow):
         # Initialize UI (open main window)
         self.initUI()
         self.pages = {}
+        self.last_file = None
 
     def initUI(self):
         ui_file = frozen(osp.join('data', 'wndmain.ui'))
@@ -386,6 +387,7 @@ class WndMain(QtWidgets.QMainWindow):
     @QtCore.Slot()
     def on_btnFilesClear_clicked(self):
         self.listFiles.clear()
+        self.last_file = None
 
     @QtCore.Slot()
     def on_btnFileOpenLoc_clicked(self):
@@ -575,12 +577,21 @@ class WndMain(QtWidgets.QMainWindow):
                                        self.tr("No pages to save!"))
             return
         supported_files = self.tr("PDF file (*.pdf)")
+        try:
+            if self.last_file:
+                filename = self.last_file
+            else:
+                filename = self.listFiles.item(0).data(QtCore.Qt.ToolTipRole)
+                filename = osp.join(osp.dirname(filename), 'output.pdf')
+        except:
+            filename = ""
         filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
-                                                     "",
+                                                     filename,
                                                      supported_files)[0]
         if filename:
             filename = filename.replace("/", osp.sep)
+            self.last_file = filename
             output_pdf = pdf.PdfFileWriter()
             rows = range(self.listPages.count())
             for item in [self.listPages.item(row) for row in rows]:
