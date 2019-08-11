@@ -649,9 +649,14 @@ class WndMain(QtWidgets.QMainWindow):
                                        self.tr("No pages to look for images!"))
             return
         supported_files = self.tr("Image file prefix (*)")
+        try:
+            filename = self.listFiles.item(0).data(QtCore.Qt.ToolTipRole)
+            filename = osp.splitext(filename)[0] + '_image_'
+        except:
+            filename = ""
         filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      self.tr('Save file'),
-                                                     "",
+                                                     filename,
                                                      supported_files)[0]
         if filename:
             fileprefix, ext = osp.splitext(filename)
