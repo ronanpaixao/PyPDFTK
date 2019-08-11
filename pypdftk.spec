@@ -4,21 +4,7 @@ single_file = True
 name = "PyPDFTK"
 
 import sys
-import setuptools
-if setuptools.__version__ != '19.2':
-    raise RuntimeError('''
-Compiling to EXE requires setuptools 19.2
-> conda install setuptools=19.2
-''')
-
 import os.path as osp
-st_path = osp.join('build', 'pypdftk', 'setuptools-{}-py{}.{}.egg'
-    .format(setuptools.__version__, 
-    sys.version_info.major, 
-    sys.version_info.minor))
-if osp.exists(st_path):
-    import shutil
-    shutil.rmtree(st_path)
 
 # Convert logo PNG to ICO
 png_filename = osp.join('data', 'logo.png')
@@ -34,41 +20,48 @@ datas = []
 for r, d, fs in os.walk("data"):
     datas.extend([(osp.join(r, f), r) for f in fs])
 datas.append(('build/logo.ico', '.'))
-    
+
 a = Analysis(['pypdftk.py'],
-             #pathex=['D:\\workspace\\PyPDFTK'],
-             binaries=None,
+             pathex=[],
+             binaries=[],
              datas=datas,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=['rthook.py'],
-             excludes=['PyQt4.QtWebKit',
-                       'PyQt4.QtNetwork',
-                       'PyQt4.QtOpenGL',
-                       'PyQt4.QtSvg',
-                       'PyQt4.QtTest',
-                       'PyQt4.QtXml',
+             excludes=[  # Comment if you use these modules
+                       'PyQt5.QtDBus',
+                       'PyQt5.QtWebKit',
+                       'PyQt5.QtNetwork',
+                       'PyQt5.QtOpenGL',
+                       'PyQt5.QtSvg',
+                       'PyQt5.QtTest',
+                       'PyQt5.QtXml',
                       ],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
-             cipher=block_cipher)
+             cipher=block_cipher,
+             noarchive=False)
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-exclude_starts = [
-    'qt4_plugins',
+exclude_binaries = (
+    'qt5_plugins',
     '_cffi',
-    #'_ctypes',
     '_hashlib',
     '_ssl',
     '_tkinter',
     '_win32',
     'bz2',
+    'libssl',
     'mfc',
     'msvcm90',
     'msvcr90',
     'msvcp90',
-    'PyQt4.QtSql',
+    'PyQt5.QtSql',
+    'Qt5DBus',
+    'Qt5Network',
+    'Qt5Qml',
+    'Qt5Quick',
     'QtOpenGL',
     'QtSql',
     'QtSvg',
@@ -81,30 +74,25 @@ exclude_starts = [
     'win32trace',
     'win32wnet',
     'win32ui',
-    'select',
-]
-def include_binary(binary):
-    for start in exclude_starts:
-        if binary.startswith(start):
-            return False
-    return True
+    'PyQt5\\Qt\\bin\\d3dcompiler',
+    'PyQt5\\Qt\\bin\\libEGL',
+    'PyQt5\\Qt\\bin\\libGLES',
+    'PyQt5\\Qt\\bin\\opengl',
+    'PyQt5\\Qt\\plugins\\platforms\\qoffscreen',
+    'libcrypto',
+    'libGLES',
+)
+a.binaries = [binary for binary in a.binaries if
+              not binary[0].startswith(exclude_binaries)]
 
-a.binaries = [binary for binary in a.binaries if include_binary(binary[0])]
-
-exclude_datas = [
+exclude_datas = (
     r'tcl\encoding',
     r'tcl\tzdata',
     r'tcl\msgs',
     r'tk\images',
     r'tk\msgs',
-]
-def include_data(data):
-    for start in exclude_datas:
-        if data.startswith(start):
-            return False
-    return True
-
-a.datas = [data for data in a.datas if include_data(data[0])]
+)
+a.datas = [data for data in a.datas if not data[0].startswith(exclude_datas)]
 
 if single_file:
     exe_files = [
@@ -120,6 +108,7 @@ exe = EXE(pyz,
           exclude_binaries=not single_file,
           name=name,
           debug=False,
+          bootloader_ignore_signals=False,
           #strip=True,
           upx=True,
           console=False,
@@ -132,4 +121,5 @@ if not single_file:
                    a.datas,
                    strip=False,
                    upx=True,
+                   upx_exclude=[],
                    name=name)
