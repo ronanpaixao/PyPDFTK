@@ -1,3 +1,7 @@
 PyInstaller
 PyPDF2
 reportlab
+qtpy
+sip
+PyQt5
+six
