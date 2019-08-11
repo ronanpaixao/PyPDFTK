@@ -44,7 +44,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;PyPDFTK 1.1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Python PDF Toolkit&lt;br/&gt;Copyright ©2016 Ronan Paixão&lt;br/&gt;Licensed under the terms of the MIT License.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/ronanpaixao/PyPDFTK&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub repository&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Despite similar naming, this project is not associated, affiliated nor endorsed by PDFTK.&lt;/p&gt;&lt;p&gt;This program makes use of the following libraries and programs, with respective licenses:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;PyPDFTK 1.1.1&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The Python PDF Toolkit&lt;br/&gt;Copyright ©2016-2019 Ronan Paixão&lt;br/&gt;Licensed under the terms of the MIT License.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/ronanpaixao/PyPDFTK&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub repository&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Despite similar naming, this project is not associated, affiliated nor endorsed by PDFTK.&lt;/p&gt;&lt;p&gt;This program makes use of the following libraries and programs, with respective licenses:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -79,7 +79,7 @@
          <property name="plainText">
           <string>MIT License
 
-Copyright (c) 2016 Ronan Paixão
+Copyright (c) 2016-2019 Ronan Paixão
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the &quot;Software&quot;), to deal
