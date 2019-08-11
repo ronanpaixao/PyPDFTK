@@ -65,13 +65,18 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
     i = start_index
     for obj in xObject:
         if xObject[obj]['/Subtype'] == '/Image':
-            filt = xObject[obj]['/Filter']
-            print("extracting {} to {}{:04}.xxx".format(filt, filename_prefix, i))
+            filt = xObject[obj].get('/Filter', 'raw')
+            print("extracting {} {} to {}{:04}.xxx".format(obj, filt, filename_prefix, i))
             size = (xObject[obj]['/Width'], xObject[obj]['/Height'])
             color_space = xObject[obj]['/ColorSpace']
             if isinstance(color_space, pdf.generic.ArrayObject) and color_space[0] == '/Indexed':
                 color_space, base, hival, lookup = [v.getObject() for v in color_space] # pg 262
-            mode = img_modes[color_space]
+            if isinstance(color_space, pdf.generic.ArrayObject) and color_space[0] == '/ICCBased':
+                color_space, components = [v.getObject() for v in color_space] # pg 274
+            if color_space == '/ICCBased':
+                mode = {1: 'P', 3: 'RGB', '4': 'CMYK'}.get(components['/N'])
+            else:
+                mode = img_modes[color_space]
 
             # xObject[obj].getData() does not work for DCTDecode, JPXDecode and
             # CCITTFaxDecode
@@ -95,10 +100,24 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 
             if filt == '/FlateDecode':
                 img = Image.frombytes(mode, size, data)
+                fmt = 'jpg' if mode == 'CMYK' else 'png'
                 if color_space == '/Indexed':
-                    img.putpalette(lookup.getData())
-                    img = img.convert('RGB')
-                img.save("{}{:04}.png".format(filename_prefix, i))
+                    rawmode = img_modes[base]
+                    if rawmode == 'RGB':
+                        img.putpalette(lookup.getData(), rawmode)
+                        img = img.convert('RGB')
+                    else:  # Pillow's ImagePalette only supports RGB
+                        if rawmode in {'RGBA', 'CMYK'}:
+                            n = 4
+                        else:
+                            n = 3
+                        palette = lookup.getData()
+                        palette = [palette[i:i + n] for i in range(0, len(palette), n)]
+                        data2 = b''.join([palette[b] for b in data])
+                        img = Image.frombytes(rawmode, size, data2)
+                        fmt = 'jpg'
+
+                img.save("{}{:04}.{}".format(filename_prefix, i, fmt))
             elif filt == '/DCTDecode':
                 img = open("{}{:04}.jpg".format(filename_prefix, i), "wb")
                 img.write(data)
@@ -129,6 +148,9 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
                 img_name = "{}{:04}.tiff".format(filename_prefix, i)
                 with open(img_name, 'wb') as img_file:
                     img_file.write(tiff_header + data)
+            elif filt == 'raw':
+                img = Image.frombytes('CMYK', size, data)
+                img.save("{}{:04}.jpg".format(filename_prefix, i))
             i += 1
 
     return i
