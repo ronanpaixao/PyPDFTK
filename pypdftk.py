@@ -186,6 +186,10 @@ class WndMain(QtWidgets.QMainWindow):
     ######################
     def __init__(self, *args, **kwargs):
         super(WndMain, self).__init__(*args, **kwargs)
+        # Setup settings storage
+        self.settings = QtCore.QSettings("settings.ini",
+                                         QtCore.QSettings.IniFormat)
+        # Initialize UI (open main window)
         self.initUI()
         self.pages = {}
 
@@ -203,8 +207,13 @@ class WndMain(QtWidgets.QMainWindow):
         self.lineStampY.setValidator(validator)
         self.lineFileDPI.setValidator(validator)
 
+        # Load window geometry and state
+        self.restoreGeometry(self.settings.value("geometry", b""))
+        self.restoreState(self.settings.value("windowState", b""))
+
         self.show()
 
+    ### Slots and accessory methods
     def open_file(self, filename):
         filename = filename.replace("/", osp.sep)
         if not osp.exists(filename):
@@ -647,6 +656,13 @@ class WndMain(QtWidgets.QMainWindow):
         dialog = QtWidgets.QDialog()
         uic.loadUi(ui_file, dialog)
         dialog.exec_()
+
+    ### Method overrides:
+    def closeEvent(self, e):
+        # Write window geometry and state to config file
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("windowState", self.saveState())
+        e.accept()
 
 
 #%%
