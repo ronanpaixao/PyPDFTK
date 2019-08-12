@@ -117,13 +117,16 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
                         img = Image.frombytes(rawmode, size, data2)
                         fmt = 'jpg'
 
-                img.save("{}{:04}.{}".format(filename_prefix, i, fmt))
+                img_fname = "{}{:04}.{}".format(filename_prefix, i, fmt)
+                img.save(img_fname)
             elif filt == '/DCTDecode':
-                img = open("{}{:04}.jpg".format(filename_prefix, i), "wb")
+                img_fname = "{}{:04}.jpg".format(filename_prefix, i)
+                img = open(img_fname, "wb")
                 img.write(data)
                 img.close()
             elif filt == '/JPXDecode':
-                img = open("{}{:04}.jp2".format(filename_prefix, i), "wb")
+                img_fname = "{}{:04}.jp2".format(filename_prefix, i)
+                img = open(img_fname, "wb")
                 img.write(data)
                 img.close()
 #            The  CCITTFaxDecode filter decodes image data that has been encoded using
@@ -145,12 +148,39 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
 
                 img_size = len(data)
                 tiff_header = tiff_header_for_CCITT(width, height, img_size, CCITT_group)
-                img_name = "{}{:04}.tiff".format(filename_prefix, i)
-                with open(img_name, 'wb') as img_file:
+                img_fname = "{}{:04}.tiff".format(filename_prefix, i)
+                with open(img_fname, 'wb') as img_file:
                     img_file.write(tiff_header + data)
             elif filt == 'raw':
                 img = Image.frombytes('CMYK', size, data)
-                img.save("{}{:04}.jpg".format(filename_prefix, i))
+                img_fname = "{}{:04}.jpg".format(filename_prefix, i)
+                img.save(img_fname)
+
+            # Try to insert ICC profile
+            if color_space[0] == '/ICCBased':
+                img = Image.open(img_fname)
+                img.save(img_fname, icc_profile=components.getData())
+
+            # Grabbing image mask and applying it to another image
+            # TODO: support the /Mask property (pg 341, 351)
+            #       wish I had a test file
+            if '/SMask' in xObject[obj]:  # Soft mask (pg 341)
+                # Simplified image loading. Masks should only be black & white
+                # or grayscale
+                msize = (xObject[obj]['/SMask']['/Width'],
+                         xObject[obj]['/SMask']['/Height'])
+                mcolor_space = xObject[obj]['/SMask']['/ColorSpace']
+                mmode = img_modes[mcolor_space]
+                mdata = data = xObject[obj]['/SMask'].getData()
+                mask = Image.frombytes(mmode, msize, mdata)
+
+                img = Image.open(img_fname)
+                if img.mode not in {'RGB', 'RGBA'}:
+                    img = img.convert('RGBA')
+
+                img.putalpha(mask)
+                img.save("{}{:04}_masked.png".format(filename_prefix, i))
+
             i += 1
 
     return i
