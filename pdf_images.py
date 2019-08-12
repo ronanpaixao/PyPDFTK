@@ -157,7 +157,7 @@ def extract_images(page, filename_prefix="IMG_", start_index=0):
                 img.save(img_fname)
 
             # Try to insert ICC profile
-            if color_space[0] == '/ICCBased':
+            if color_space == '/ICCBased':
                 img = Image.open(img_fname)
                 img.save(img_fname, icc_profile=components.getData())
 
