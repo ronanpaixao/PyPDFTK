@@ -651,7 +651,7 @@ class WndMain(QtWidgets.QMainWindow):
         supported_files = self.tr("Image file prefix (*)")
         try:
             filename = self.listFiles.item(0).data(QtCore.Qt.ToolTipRole)
-            filename = osp.splitext(filename)[0] + '_image_'
+            filename = osp.splitext(filename)[0] + '_IMG_'
         except:
             filename = ""
         filename = QtWidgets.QFileDialog.getSaveFileName(self,
