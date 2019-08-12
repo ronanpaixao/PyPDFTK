@@ -662,9 +662,18 @@ class WndMain(QtWidgets.QMainWindow):
             fileprefix, ext = osp.splitext(filename)
             rows = range(self.listPages.count())
             i = 0
-            for item in [self.listPages.item(row) for row in rows]:
+            for row, item in [(row, self.listPages.item(row)) for row in rows]:
                 page_uuid = item.data(QtCore.Qt.UserRole)
-                i = pdf_images.extract_images(self.pages[page_uuid].obj, filename, i)
+                try:
+                    i = pdf_images.extract_images(self.pages[page_uuid].obj, filename, i)
+                except:
+                    QtWidgets.QMessageBox.critical(self, self.tr("Error"),
+                        self.tr("There was a problem extracting images from "
+                                "page {}.<br>Please file a bug report, "
+                                "attaching the problematic file if possible, in <br>"
+                                "<a href='https://github.com/ronanpaixao/PyPDFTK/issues'>"
+                                "https://github.com/ronanpaixao/PyPDFTK/issues"
+                                "</a>".format(row + 1)))
 
     @QtCore.Slot()
     def on_btnCredits_clicked(self):
